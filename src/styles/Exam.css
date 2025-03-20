@@ -1,0 +1,136 @@
+.exam-container {
+  animation: fadeIn 0.5s ease-in;
+}
+
+.exam-header {
+  background: #ffffff;
+  padding: 25px;
+  border-radius: 20px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  margin-bottom: 40px;
+}
+
+.exam-header h1 {
+  margin: 0 0 15px;
+  font-size: 32px;
+  color: #4a90e2;
+  font-weight: 600;
+}
+
+.exam-header p {
+  margin: 0;
+  font-size: 16px;
+  color: #718096;
+}
+
+.exam-form {
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+}
+
+.question-card {
+  background: #ffffff;
+  padding: 25px;
+  border-radius: 15px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s;
+}
+
+.question-card:hover {
+  transform: translateY(-8px);
+}
+
+.question-card h3 {
+  margin: 0 0 20px;
+  font-size: 22px;
+  color: #2d3748;
+}
+
+.options {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.option-label {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 16px;
+  padding: 12px;
+  background: #f7fafc;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.2s;
+}
+
+.option-label:hover {
+  background: #edf2f7;
+  transform: scale(1.02);
+}
+
+.option-label input[type="radio"] {
+  accent-color: #4a90e2;
+}
+
+.option-label span {
+  color: #2d3748;
+}
+
+.submit-button {
+  padding: 12px 25px;
+  background-color: #4a90e2;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.2s;
+}
+
+.submit-button:disabled {
+  background-color: #a0aec0;
+  cursor: not-allowed;
+}
+
+.submit-button:hover:not(:disabled) {
+  background-color: #357abd;
+  transform: scale(1.05);
+}
+
+.loading, .error, .no-data {
+  text-align: center;
+  padding: 25px;
+  font-size: 18px;
+  background: #ffffff;
+  border-radius: 15px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+.error {
+  color: #e53e3e;
+}
+
+.no-data {
+  color: #718096;
+}
+
+.loading {
+  color: #4a90e2;
+}
+.back-button {
+  padding: 10px 20px;
+  background-color: #a0aec0;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.2s;
+}
+
+.back-button:hover {
+  background-color: #718096;
+  transform: scale(1.05);
+}

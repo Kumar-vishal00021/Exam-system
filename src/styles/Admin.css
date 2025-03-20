@@ -1,0 +1,222 @@
+.admin-container {
+  animation: fadeIn 0.5s ease-in;
+}
+
+.admin-header {
+  background: #ffffff;
+  padding: 25px;
+  border-radius: 20px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.admin-header h1 {
+  margin: 0;
+  font-size: 32px;
+  color: #4a90e2;
+  font-weight: 600;
+}
+
+.admin-form {
+  background: #ffffff;
+  padding: 30px;
+  border-radius: 20px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+}
+
+.form-group label, .options-group label {
+  font-size: 16px;
+  color: #2d3748;
+  font-weight: 500;
+}
+
+.form-group input, .options-group input {
+  padding: 12px;
+  font-size: 16px;
+  border: 2px solid #e2e8f0;
+  border-radius: 10px;
+  outline: none;
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.form-group input:focus, .options-group input:focus {
+  border-color: #4a90e2;
+  box-shadow: 0 0 8px rgba(74, 144, 226, 0.3);
+}
+
+.options-group {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.question-card {
+  background: #f7fafc;
+  padding: 25px;
+  border-radius: 15px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  position: relative;
+  transition: transform 0.3s;
+}
+
+.question-card:hover {
+  transform: translateY(-8px);
+}
+
+.add-question-button, .save-button, .remove-button {
+  padding: 12px 25px;
+  font-size: 16px;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.2s;
+}
+
+.add-question-button {
+  background-color: #ecc94b;
+  color: #2d3748;
+}
+
+.add-question-button:hover {
+  background-color: #d69e2e;
+  transform: scale(1.05);
+}
+
+.save-button {
+  background-color: #4a90e2;
+  color: white;
+}
+
+.save-button:hover {
+  background-color: #357abd;
+  transform: scale(1.05);
+}
+
+.remove-button {
+  background-color: #f56565;
+  color: white;
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  padding: 8px 15px;
+}
+
+.remove-button:hover {
+  background-color: #e53e3e;
+  transform: scale(1.05);
+}
+
+.exam-list {
+  margin-top: 50px;
+}
+
+.exam-list h2 {
+  font-size: 28px;
+  color: #2d3748;
+  margin-bottom: 25px;
+}
+
+.exam-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 25px;
+}
+
+.exam-item {
+  background: #ffffff;
+  padding: 25px;
+  border-radius: 15px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s;
+}
+
+.exam-item:hover {
+  transform: translateY(-8px);
+}
+
+.exam-item h3 {
+  margin: 0 0 15px;
+  font-size: 22px;
+  color: #4a90e2;
+}
+
+.exam-item p {
+  margin: 0 0 20px;
+  font-size: 16px;
+  color: #718096;
+}
+
+.exam-actions {
+  display: flex;
+  gap: 15px;
+}
+
+.edit-button, .delete-button {
+  padding: 8px 15px;
+  font-size: 14px;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.2s;
+}
+
+.edit-button {
+  background-color: #48bb78;
+  color: white;
+}
+
+.edit-button:hover {
+  background-color: #38a169;
+  transform: scale(1.05);
+}
+
+.delete-button {
+  background-color: #f56565;
+  color: white;
+}
+
+.delete-button:hover {
+  background-color: #e53e3e;
+  transform: scale(1.05);
+}
+
+.error, .no-access, .no-data, .loading {
+  text-align: center;
+  padding: 25px;
+  font-size: 18px;
+  background: #ffffff;
+  border-radius: 15px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  margin: 20px 0;
+}
+
+.error {
+  color: #e53e3e;
+}
+
+.no-access, .no-data {
+  color: #718096;
+}
+
+.loading {
+  color: #4a90e2;
+}
+.back-button {
+  padding: 10px 20px;
+  background-color: #a0aec0;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.2s;
+}
+
+.back-button:hover {
+  background-color: #718096;
+  transform: scale(1.05);
+}
