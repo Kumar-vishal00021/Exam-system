@@ -174,3 +174,66 @@
   background-color: #718096;
   transform: scale(1.05);
 }
+
+/* Existing styles remain unchanged, adding new sections below */
+
+.top-students-section, .all-results-section {
+  margin-bottom: 50px;
+}
+
+.top-students-section h2, .all-results-section h2 {
+  font-size: 28px;
+  color: #2d3748;
+  margin-bottom: 25px;
+}
+
+.top-students-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.top-student-item {
+  background: #ffffff;
+  padding: 25px;
+  border-radius: 15px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s;
+  border-left: 6px solid #48bb78;
+}
+
+.top-student-item:hover {
+  transform: translateY(-8px);
+}
+
+.top-student-item h3 {
+  margin: 0 0 10px;
+  font-size: 20px;
+  color: #4a90e2;
+}
+
+.top-student-item p {
+  margin: 5px 0;
+  font-size: 16px;
+  color: #718096;
+}
+
+.all-results-section .results-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.all-results-section .result-item {
+  background: #ffffff;
+  padding: 25px;
+  border-radius: 15px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s;
+}
+
+.all-results-section .result-item:hover {
+  transform: translateY(-8px);
+}
+
+/* Existing result-item styles apply to both admin and non-admin */
