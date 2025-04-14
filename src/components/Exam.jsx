@@ -1,7 +1,7 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { db } from '../firebase/firebaseConfig';
-import { doc, getDoc, collection, addDoc, query, where, getDocs } from 'firebase/firestore';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { useAuth } from '../context/AuthContext';
 import '../styles/Exam.css';
 
@@ -10,141 +10,157 @@ export default function Exam() {
   const { currentUser } = useAuth();
   const navigate = useNavigate();
   const [exam, setExam] = useState(null);
-  const [canTakeExam, setCanTakeExam] = useState(true);
-  const [timeLeft, setTimeLeft] = useState(0);
-  const [answers, setAnswers] = useState({});
+  const [currentQuestion, setCurrentQuestion] = useState(0);
+  const [answers, setAnswers] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [isStarted, setIsStarted] = useState(false);
-  const timerRef = useRef(null);
+  const [timeLeft, setTimeLeft] = useState(null);
 
   useEffect(() => {
-    const checkEligibilityAndLoadExam = async () => {
+    const fetchExam = async () => {
       try {
-        const resultQuery = query(
-          collection(db, 'results'),
-          where('userId', '==', currentUser.uid),
-          where('examId', '==', examId)
-        );
-        const resultSnapshot = await getDocs(resultQuery);
-        if (!resultSnapshot.empty) {
-          const result = resultSnapshot.docs[0].data();
-          if (!result.reExamAllowed) {
-            setCanTakeExam(false);
-            setLoading(false);
-            return;
-          }
-        }
-
         const examDoc = await getDoc(doc(db, 'exams', examId));
         if (examDoc.exists()) {
-          const examData = examDoc.data();
-          setExam({ id: examDoc.id, ...examData });
-          setTimeLeft(examData.questions.length * 60);
+          setExam({ id: examDoc.id, ...examDoc.data() });
+          setAnswers(new Array(examDoc.data().questions.length).fill(null));
+          setTimeLeft(examDoc.data().duration * 60);
         }
       } catch (error) {
-        console.error('Error:', error);
+        console.error('Error fetching exam:', error);
       } finally {
         setLoading(false);
       }
     };
-    checkEligibilityAndLoadExam();
-  }, [examId, currentUser]);
-
-  const startExam = () => {
-    alert(`Exam started! You have ${exam.questions.length} minutes to complete.`);
-    setIsStarted(true);
-  };
+    fetchExam();
+  }, [examId]);
 
   useEffect(() => {
-    if (isStarted && timeLeft > 0 && canTakeExam) {
-      timerRef.current = setInterval(() => {
-        setTimeLeft(prev => {
-          if (prev <= 1) {
-            handleSubmit();
-            return 0;
-          }
-          return prev - 1;
-        });
-      }, 1000);
-    }
-    return () => clearInterval(timerRef.current);
-  }, [isStarted, timeLeft, canTakeExam]);
+    if (timeLeft === null || timeLeft <= 0) return;
 
-  const handleAnswerChange = (questionIndex, answer) => {
-    setAnswers(prev => ({ ...prev, [questionIndex]: answer }));
+    const timer = setInterval(() => {
+      setTimeLeft(prev => {
+        if (prev <= 1) {
+          submitExam();
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [timeLeft]);
+
+  useEffect(() => {
+    const handleBeforeUnload = (e) => {
+      e.preventDefault();
+      e.returnValue = 'Leaving will submit your exam. Are you sure?';
+    };
+
+    const handlePopState = () => {
+      submitExam();
+      navigate('/dashboard');
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    window.addEventListener('popstate', handlePopState);
+
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+      window.removeEventListener('popstate', handlePopState);
+    };
+  }, [answers, exam, currentUser, examId, navigate]);
+
+  const handleAnswer = (answer) => {
+    const newAnswers = [...answers];
+    newAnswers[currentQuestion] = answer;
+    setAnswers(newAnswers);
   };
 
-  const handleSubmit = async (e) => {
-    if (e) e.preventDefault();
-    clearInterval(timerRef.current);
-    try {
-      const score = exam.questions.reduce((total, q, index) => {
-        return total + (answers[index] === q.correctAnswer ? 1 : 0);
-      }, 0);
+  const handleNext = () => {
+    if (currentQuestion < exam.questions.length - 1) {
+      setCurrentQuestion(currentQuestion + 1);
+    }
+  };
 
-      await addDoc(collection(db, 'results'), {
+  const handlePrevious = () => {
+    if (currentQuestion > 0) {
+      setCurrentQuestion(currentQuestion - 1);
+    }
+  };
+
+  const submitExam = async () => {
+    try {
+      let score = 0;
+      exam.questions.forEach((q, index) => {
+        if (answers[index] === q.correctAnswer) score++;
+      });
+
+      const result = {
         userId: currentUser.uid,
-        examId: examId,
+        examId: exam.id,
         examTitle: exam.title,
         subject: exam.subject,
         score,
         totalQuestions: exam.questions.length,
         answers,
         timestamp: new Date(),
-        reExamAllowed: false,
-      });
+      };
+
+      await setDoc(doc(db, 'results', `${currentUser.uid}_${examId}`), result);
       navigate(`/result/${examId}`);
     } catch (error) {
-      console.error('Submission error:', error);
+      console.error('Error submitting exam:', error);
+      alert('Failed to submit exam: ' + error.message);
     }
   };
 
-  const formatTime = (seconds) => {
-    const minutes = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${minutes}:${secs < 10 ? '0' : ''}${secs}`;
-  };
-
   if (loading) return <div className="loading-spinner">Loading...</div>;
-  if (!canTakeExam) return <div className="error-message">You cannot retake this exam.</div>;
   if (!exam) return <div className="error-message">Exam not found.</div>;
 
   return (
     <div className="exam-container container">
       <header className="exam-header">
         <h1>{exam.title} ({exam.subject})</h1>
-        {isStarted && <div className="timer">Time Left: {formatTime(timeLeft)}</div>}
+        <div className="exam-info">
+          <p>Time Left: {Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, '0')}</p>
+          <p>Question {currentQuestion + 1} of {exam.questions.length}</p>
+        </div>
       </header>
-      {!isStarted ? (
-        <button className="start-button" onClick={startExam}>
-          Start Exam
-        </button>
-      ) : (
-        <form onSubmit={handleSubmit} className="exam-form">
-          {exam.questions.map((q, index) => (
-            <div key={index} className="question-card">
-              <h3>{q.text}</h3>
-              <div className="options">
-                {q.options.map((option, optIndex) => (
-                  <label key={optIndex} className="option-label">
-                    <input
-                      type="radio"
-                      name={`q-${index}`}
-                      value={option}
-                      checked={answers[index] === option}
-                      onChange={() => handleAnswerChange(index, option)}
-                    />
-                    <span>{option}</span>
-                  </label>
-                ))}
-              </div>
-            </div>
+      <section className="question-section">
+        <h2>Question {currentQuestion + 1}</h2>
+        <p>{exam.questions[currentQuestion].text}</p>
+        <div className="options">
+          {exam.questions[currentQuestion].options.map((option, index) => (
+            <label key={index} className="option">
+              <input
+                type="radio"
+                name="answer"
+                value={option}
+                checked={answers[currentQuestion] === option}
+                onChange={() => handleAnswer(option)}
+              />
+              {option}
+            </label>
           ))}
-          <button type="submit" className="submit-button">
+        </div>
+      </section>
+      <div className="navigation">
+        <button
+          onClick={handlePrevious}
+          disabled={currentQuestion === 0}
+          className="nav-button"
+        >
+          Previous
+        </button>
+        {currentQuestion < exam.questions.length - 1 ? (
+          <button onClick={handleNext} className="nav-button">
+            Next
+          </button>
+        ) : (
+          <button onClick={submitExam} className="submit-button">
             Submit Exam
           </button>
-        </form>
-      )}
+        )}
+      </div>
     </div>
   );
 }

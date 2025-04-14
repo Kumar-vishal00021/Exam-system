@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { db } from '../firebase/firebaseConfig';
-import { collection, query, where, getDocs, doc, updateDoc, getDoc } from 'firebase/firestore';
+import { collection, query, where, getDocs, doc, updateDoc, deleteDoc, getDoc } from 'firebase/firestore';
 import '../styles/AdminExamResults.css';
 
 export default function AdminExamResults() {
@@ -14,18 +14,15 @@ export default function AdminExamResults() {
   useEffect(() => {
     const fetchResults = async () => {
       try {
-        // Fetch exam details
         const examDoc = await getDoc(doc(db, 'exams', examId));
         if (examDoc.exists()) {
           setExam(examDoc.data());
         }
 
-        // Fetch results for this exam
         const resultsQuery = query(collection(db, 'results'), where('examId', '==', examId));
         const resultsSnapshot = await getDocs(resultsQuery);
         const resultsData = resultsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
-        // Fetch user names
         const userIds = [...new Set(resultsData.map(result => result.userId))];
         const usersSnapshot = await Promise.all(
           userIds.map(id => getDoc(doc(db, 'users', id)))
@@ -34,7 +31,6 @@ export default function AdminExamResults() {
           usersSnapshot.map(snap => [snap.id, snap.exists() ? snap.data().name : 'Anonymous'])
         );
 
-        // Calculate stats (students per date with full details)
         const statsByDate = resultsData.reduce((acc, result) => {
           const date = new Date(result.timestamp?.toDate()).toLocaleDateString('en-US', {
             year: 'numeric',
@@ -57,13 +53,14 @@ export default function AdminExamResults() {
             totalQuestions: result.totalQuestions,
             percentage: (result.score / result.totalQuestions) * 100,
             timestamp: result.timestamp,
-            reExamAllowed: result.reExamAllowed,
+            reExamAllowed: result.reExamAllowed || false,
           });
           return acc;
         }, {});
         setStats(statsByDate);
       } catch (error) {
         console.error('Error fetching results:', error);
+        alert('Failed to load results: ' + error.message);
       } finally {
         setLoading(false);
       }
@@ -86,6 +83,26 @@ export default function AdminExamResults() {
       alert('Re-exam allowed for this student.');
     } catch (error) {
       console.error('Error allowing re-exam:', error);
+      alert('Failed to allow re-exam: ' + error.message);
+    }
+  };
+
+  const deleteResult = async (resultId, date) => {
+    if (!window.confirm('Are you sure you want to delete this student’s result?')) return;
+    try {
+      await deleteDoc(doc(db, 'results', resultId));
+      setStats(prev => ({
+        ...prev,
+        [date]: {
+          ...prev[date],
+          count: prev[date].count - 1,
+          students: prev[date].students.filter(student => student.id !== resultId),
+        },
+      }));
+      alert('Result deleted successfully.');
+    } catch (error) {
+      console.error('Error deleting result:', error);
+      alert('Failed to delete result: ' + error.message);
     }
   };
 
@@ -108,7 +125,7 @@ export default function AdminExamResults() {
         <div className="stats-list">
           {Object.entries(stats).length > 0 ? (
             Object.entries(stats)
-              .sort(([dateA], [dateB]) => new Date(dateB) - new Date(dateA)) // Sort by date descending
+              .sort(([dateA], [dateB]) => new Date(dateB) - new Date(dateA))
               .map(([date, { count, subject, students }], index) => (
                 <div key={index} className="stats-card">
                   <h3>
@@ -142,6 +159,12 @@ export default function AdminExamResults() {
                                   Allow Re-Exam
                                 </button>
                               )}
+                              <button
+                                onClick={() => deleteResult(student.id, date)}
+                                className="delete-result-button"
+                              >
+                                Delete Result
+                              </button>
                             </div>
                           </div>
                         ))}

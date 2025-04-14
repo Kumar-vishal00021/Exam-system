@@ -1,5 +1,5 @@
 .dashboard {
-  padding: 40px;
+  padding: 20px;
   background: linear-gradient(135deg, #f7fafc, #edf2f7);
   min-height: 100vh;
   animation: fadeIn 0.5s ease-in;
@@ -7,27 +7,30 @@
 
 .dashboard-header {
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 30px;
+  margin-bottom: 20px;
   background: #ffffff;
-  padding: 20px;
-  border-radius: 15px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  padding: 15px;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
 
 .dashboard-header h1 {
-  font-size: 28px;
+  font-size: clamp(20px, 5vw, 24px);
   color: #2d3748;
   margin: 0;
+  flex: 1;
+  text-align: center;
 }
 
 .back-button, .logout-button {
-  padding: 10px 20px;
-  font-size: 16px;
+  padding: 8px 16px;
+  font-size: clamp(14px, 4vw, 16px);
   color: white;
   border: none;
-  border-radius: 10px;
+  border-radius: 8px;
   cursor: pointer;
   transition: transform 0.2s, background 0.3s;
 }
@@ -52,12 +55,12 @@
 
 .admin-link {
   display: inline-block;
-  margin-bottom: 20px;
-  padding: 10px 20px;
-  font-size: 16px;
+  margin-bottom: 15px;
+  padding: 8px 16px;
+  font-size: clamp(14px, 3.5vw, 15px);
   color: white;
   background: #4a90e2;
-  border-radius: 10px;
+  border-radius: 8px;
   text-decoration: none;
   transition: transform 0.2s, background 0.3s;
 }
@@ -68,49 +71,50 @@
 }
 
 .exams-section h2, .top-students-section h2, .results-section h2 {
-  font-size: 28px;
+  font-size: clamp(18px, 4.5vw, 22px);
   color: #2d3748;
-  margin-bottom: 25px;
+  margin-bottom: 15px;
+  text-align: center;
 }
 
 .exams-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 20px;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 15px;
 }
 
 .exam-card {
   background: #ffffff;
-  padding: 25px;
-  border-radius: 15px;
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  padding: 15px;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
   transition: transform 0.3s, box-shadow 0.3s;
   animation: slideUp 0.5s ease-in;
 }
 
 .exam-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
 }
 
 .exam-card h3 {
-  font-size: 20px;
+  font-size: clamp(16px, 4vw, 18px);
   color: #4a90e2;
-  margin: 0 0 10px;
+  margin: 0 0 8px;
 }
 
 .exam-card p {
-  font-size: 16px;
+  font-size: clamp(14px, 3.5vw, 15px);
   color: #718096;
-  margin: 0 0 15px;
+  margin: 0 0 10px;
 }
 
 .view-results-button, .start-exam-button {
   display: inline-block;
-  padding: 10px 20px;
-  font-size: 16px;
+  padding: 8px 16px;
+  font-size: clamp(14px, 3.5vw, 15px);
   color: white;
-  border-radius: 10px;
+  border-radius: 8px;
   text-decoration: none;
   transition: transform 0.2s, background 0.3s;
 }
@@ -136,46 +140,66 @@
 .top-students-list, .results-list {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 15px;
 }
 
 .top-student-item, .result-item {
   background: #ffffff;
-  padding: 25px;
-  border-radius: 15px;
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  padding: 15px;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
   transition: transform 0.3s, box-shadow 0.3s;
   animation: slideUp 0.5s ease-in;
 }
 
 .top-student-item:hover, .result-item:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
 }
 
 .top-student-item h3, .result-item h3 {
-  font-size: 20px;
+  font-size: clamp(16px, 4vw, 18px);
   color: #4a90e2;
-  margin: 0 0 10px;
+  margin: 0 0 8px;
 }
 
 .top-student-item p, .result-item p {
-  font-size: 16px;
+  font-size: clamp(14px, 3.5vw, 15px);
   color: #718096;
-  margin: 5px 0;
+  margin: 4px 0;
 }
 
 .no-data {
-  font-size: 18px;
+  font-size: clamp(14px, 3.5vw, 15px);
   color: #718096;
   text-align: center;
-  padding: 20px;
+  padding: 10px;
 }
 
 .loading-spinner {
-  font-size: 24px;
+  font-size: clamp(18px, 5vw, 20px);
   text-align: center;
   animation: spin 1s linear infinite;
+}
+
+@media (max-width: 600px) {
+  .dashboard {
+    padding: 10px;
+  }
+
+  .dashboard-header {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .exams-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .view-results-button, .start-exam-button {
+    width: 100%;
+    text-align: center;
+  }
 }
 
 @keyframes fadeIn {
