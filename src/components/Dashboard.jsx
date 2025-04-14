@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { db, auth } from '../firebase/firebaseConfig';
-import { collection, getDocs, getDoc,doc, query, where } from 'firebase/firestore';
+import { collection, getDocs, query, where, doc, getDoc } from 'firebase/firestore';
 import { signOut } from 'firebase/auth';
 import { useAuth } from '../context/AuthContext';
 import '../styles/Dashboard.css';
@@ -11,7 +11,6 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const [exams, setExams] = useState([]);
   const [results, setResults] = useState([]);
-  const [allResults, setAllResults] = useState([]);
   const [topStudents, setTopStudents] = useState([]);
   const [loading, setLoading] = useState(true);
   const isAdmin = currentUser?.email === 'kumarvishal00021@gmail.com';
@@ -26,11 +25,11 @@ export default function Dashboard() {
         setExams(examsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
 
         if (isAdmin) {
-          // Fetch all results for admin
+          // Fetch all results for top students calculation
           const allResultsSnapshot = await getDocs(collection(db, 'results'));
           const allResultsData = allResultsSnapshot.docs.map(doc => doc.data());
 
-          // Fetch user names for all results
+          // Fetch user names
           const userIds = [...new Set(allResultsData.map(result => result.userId))];
           const usersSnapshot = await Promise.all(
             userIds.map(id => getDoc(doc(db, 'users', id)))
@@ -39,15 +38,12 @@ export default function Dashboard() {
             usersSnapshot.map(snap => [snap.id, snap.exists() ? snap.data().name : 'Anonymous'])
           );
 
-          // Combine results with names and calculate percentages
+          // Calculate top 3 students
           const enrichedResults = allResultsData.map(result => ({
             ...result,
             userName: users[result.userId] || 'Anonymous',
             percentage: (result.score / result.totalQuestions) * 100,
           }));
-          setAllResults(enrichedResults);
-
-          // Calculate top 3 students
           const sortedResults = enrichedResults
             .sort((a, b) => b.percentage - a.percentage || b.score - a.score)
             .slice(0, 3);
@@ -86,7 +82,7 @@ export default function Dashboard() {
     navigate(-1);
   };
 
-  if (loading) return <div className="loading">Loading...</div>;
+  if (loading) return <div className="loading-spinner">Loading...</div>;
 
   return (
     <div className="dashboard container">
@@ -96,18 +92,28 @@ export default function Dashboard() {
         <button onClick={handleLogout} className="logout-button">Logout</button>
       </header>
 
-      {isAdmin && <Link to="/admin" className="admin-link">Manage Exams (Admin)</Link>}
+      {isAdmin && (
+        <Link to="/admin" className="admin-link">Manage Exams (Admin)</Link>
+      )}
 
       <section className="exams-section">
         <h2>Available Exams</h2>
         <div className="exams-grid">
           {exams.length > 0 ? (
             exams.map(exam => (
-              <Link key={exam.id} to={`/exam/${exam.id}`} className="exam-card">
-                <h3>{exam.title}</h3>
+              <div key={exam.id} className="exam-card">
+                <h3>{exam.title} ({exam.subject})</h3>
                 <p>{exam.description}</p>
-                <span className="start-button">Start Exam</span>
-              </Link>
+                {isAdmin ? (
+                  <Link to={`/admin/exam/${exam.id}/results`} className="view-results-button">
+                    View Student Results
+                  </Link>
+                ) : (
+                  <Link to={`/exam/${exam.id}`} className="start-exam-button">
+                    Start Exam
+                  </Link>
+                )}
+              </div>
             ))
           ) : (
             <p className="no-data">No exams available yet.</p>
@@ -116,42 +122,22 @@ export default function Dashboard() {
       </section>
 
       {isAdmin ? (
-        <>
-          <section className="top-students-section">
-            <h2>Top 3 Students</h2>
-            <div className="top-students-list">
-              {topStudents.length > 0 ? (
-                topStudents.map((student, index) => (
-                  <div key={index} className="top-student-item">
-                    <h3>{index + 1}. {student.userName}</h3>
-                    <p>Exam: {student.examTitle}</p>
-                    <p>Score: {student.score}/{student.totalQuestions} ({student.percentage.toFixed(2)}%)</p>
-                  </div>
-                ))
-              ) : (
-                <p className="no-data">No results yet.</p>
-              )}
-            </div>
-          </section>
-
-          <section className="all-results-section">
-            <h2>All Students' Results</h2>
-            <div className="results-list">
-              {allResults.length > 0 ? (
-                allResults.map((result, index) => (
-                  <div key={index} className="result-item">
-                    <h3>{result.userName}</h3>
-                    <p>Exam: {result.examTitle}</p>
-                    <p>Score: {result.score}/{result.totalQuestions} ({result.percentage.toFixed(2)}%)</p>
-                    <small>{new Date(result.timestamp?.toDate()).toLocaleString()}</small>
-                  </div>
-                ))
-              ) : (
-                <p className="no-data">No results yet.</p>
-              )}
-            </div>
-          </section>
-        </>
+        <section className="top-students-section">
+          <h2>Top 3 Students</h2>
+          <div className="top-students-list">
+            {topStudents.length > 0 ? (
+              topStudents.map((student, index) => (
+                <div key={index} className="top-student-item">
+                  <h3>{index + 1}. {student.userName}</h3>
+                  <p>Exam: {student.examTitle}</p>
+                  <p>Score: {student.score}/{student.totalQuestions} ({student.percentage.toFixed(2)}%)</p>
+                </div>
+              ))
+            ) : (
+              <p className="no-data">No results yet.</p>
+            )}
+          </div>
+        </section>
       ) : (
         <section className="results-section">
           <h2>Your Results</h2>

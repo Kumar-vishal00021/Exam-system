@@ -6,79 +6,102 @@ import { useAuth } from '../context/AuthContext';
 import '../styles/Result.css';
 
 export default function Result() {
-  const { examId } = useParams();
+  const { examId, userId } = useParams();
   const { currentUser } = useAuth();
   const navigate = useNavigate();
   const [result, setResult] = useState(null);
   const [exam, setExam] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const isAdmin = currentUser.email === 'kumarvishal00021@gmail.com';
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchResult = async () => {
       try {
-        const examRef = doc(db, 'exams', examId);
-        const examSnap = await getDoc(examRef);
-        if (examSnap.exists()) {
-          setExam({ id: examSnap.id, ...examSnap.data() });
-        } else {
-          setError('Exam not found');
-          return;
+        const examDoc = await getDoc(doc(db, 'exams', examId));
+        if (examDoc.exists()) {
+          setExam({ id: examDoc.id, ...examDoc.data() });
         }
 
-        const resultsQuery = query(
+        const targetUserId = isAdmin && userId ? userId : currentUser.uid;
+        const resultQuery = query(
           collection(db, 'results'),
-          where('userId', '==', currentUser.uid),
+          where('userId', '==', targetUserId),
           where('examId', '==', examId)
         );
-        const resultsSnap = await getDocs(resultsQuery);
-        if (!resultsSnap.empty) {
-          const latestResult = resultsSnap.docs
-            .map(doc => ({ id: doc.id, ...doc.data() }))
-            .sort((a, b) => b.timestamp.toDate() - a.timestamp.toDate())[0];
-          setResult(latestResult);
-        } else {
-          setError('No result found for this exam');
+        const resultSnapshot = await getDocs(resultQuery);
+        if (!resultSnapshot.empty) {
+          setResult(resultSnapshot.docs[0].data());
         }
-      } catch (err) {
-        setError('Failed to load result: ' + err.message);
+      } catch (error) {
+        console.error('Error:', error);
       } finally {
         setLoading(false);
       }
     };
-    fetchData();
-  }, [examId, currentUser]);
+    fetchResult();
+  }, [examId, userId, currentUser, isAdmin]);
 
   const handleBack = () => {
     navigate(-1);
   };
 
-  if (loading) return <div className="loading">Loading result...</div>;
-  if (error) return <div className="error">{error}</div>;
-  if (!exam || !result) return <div className="no-data">No result data available</div>;
+  if (loading) return <div className="loading-spinner">Loading...</div>;
+  if (!result || !exam) return <div className="error-message">No result found.</div>;
 
   return (
     <div className="result-container container">
       <header className="result-header">
         <button onClick={handleBack} className="back-button">Back</button>
-        <h1>Results for {exam.title}</h1>
-        <p className="score">Your Score: {result.score} / {result.totalQuestions}</p>
+        <h1>Result for {exam.title} ({exam.subject})</h1>
       </header>
+      <section className="result-summary">
+        <h2>Summary</h2>
+        <div className="summary-card">
+          <p>Score: {result.score}/{result.totalQuestions}</p>
+          <p>Percentage: {((result.score / result.totalQuestions) * 100).toFixed(2)}%</p>
+          <p>Date: {new Date(result.timestamp?.toDate()).toLocaleString()}</p>
+        </div>
+      </section>
       <section className="result-details">
-        <h2>Question Breakdown</h2>
-        <ul className="result-list">
-          {exam.questions.map((question, index) => {
-            const userAnswer = result.answers[index];
-            const isCorrect = userAnswer === question.correctAnswer;
+        <h2>Detailed Answers</h2>
+        <div className="answers-list">
+          {exam.questions.map((q, index) => {
+            const chosenAnswer = result.answers[index] || 'Not Answered';
+            const isCorrect = chosenAnswer === q.correctAnswer;
             return (
-              <li key={index} className={isCorrect ? 'correct' : 'incorrect'}>
-                <p><strong>Q: {question.text}</strong></p>
-                <p>Your Answer: {userAnswer || 'Not answered'}</p>
-                <p>Correct Answer: {question.correctAnswer}</p>
-              </li>
+              <div key={index} className="answer-card">
+                <h3>{index + 1}. {q.text}</h3>
+                <div className="options">
+                  {q.options.map((option, optIndex) => {
+                    const isChosen = option === chosenAnswer;
+                    const isCorrectOption = option === q.correctAnswer;
+                    return (
+                      <div
+                        key={optIndex}
+                        className={`option ${
+                          isChosen
+                            ? isCorrect
+                              ? 'correct'
+                              : 'incorrect'
+                            : isCorrectOption
+                            ? 'correct'
+                            : ''
+                        }`}
+                      >
+                        <span>{option}</span>
+                        {isChosen && (
+                          <span className="status">
+                            {isCorrect ? '✓ Correct' : '✗ Incorrect'}
+                          </span>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
             );
           })}
-        </ul>
+        </div>
       </section>
       <Link to="/dashboard" className="dashboard-button">Back to Dashboard</Link>
     </div>

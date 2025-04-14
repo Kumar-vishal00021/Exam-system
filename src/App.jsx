@@ -7,21 +7,29 @@ import Dashboard from './components/Dashboard';
 import Exam from './components/Exam';
 import Result from './components/Result';
 import Admin from './components/Admin';
+import AdminExamResults from './components/AdminExamResults'; // New component for admin results view
 import './styles/App.css';
 
 function AppContent() {
   return (
     <AuthProvider>
       <Routes>
+        {/* Public routes */}
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+
+        {/* Protected routes */}
         <Route element={<PrivateRoute />}>
           <Route path="/" element={<Dashboard />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/exam/:examId" element={<Exam />} />
           <Route path="/result/:examId" element={<Result />} />
+          <Route path="/result/:examId/:userId" element={<Result />} />
           <Route path="/admin" element={<Admin />} />
+          <Route path="/admin/exam/:examId/results" element={<AdminExamResults />} />
         </Route>
+
+        {/* Fallback route */}
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
     </AuthProvider>

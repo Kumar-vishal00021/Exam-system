@@ -1,0 +1,188 @@
+.admin-exam-results-container {
+    padding: 40px;
+    background: linear-gradient(135deg, #f7fafc, #edf2f7);
+    min-height: 100vh;
+    animation: fadeIn 0.5s ease-in;
+  }
+  
+  .results-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    background: #ffffff;
+    padding: 20px;
+    border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  }
+  
+  .results-header h1 {
+    font-size: 28px;
+    color: #2d3748;
+    margin: 0;
+  }
+  
+  .back-button {
+    padding: 10px 20px;
+    font-size: 16px;
+    color: white;
+    background: #a0aec0;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: transform 0.2s, background 0.3s;
+  }
+  
+  .back-button:hover {
+    background: #718096;
+    transform: scale(1.05);
+  }
+  
+  .stats-section {
+    margin-bottom: 50px;
+  }
+  
+  .stats-section h2 {
+    font-size: 24px;
+    color: #2d3748;
+    margin-bottom: 20px;
+  }
+  
+  .stats-list {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+  }
+  
+  .stats-card {
+    background: #ffffff;
+    padding: 25px;
+    border-radius: 15px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s, box-shadow 0.3s;
+    animation: slideUp 0.5s ease-in;
+  }
+  
+  .stats-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+  }
+  
+  .stats-card h3 {
+    font-size: 20px;
+    color: #4a90e2;
+    margin: 0 0 10px;
+  }
+  
+  .stats-card p {
+    font-size: 16px;
+    color: #718096;
+    margin: 5px 0;
+  }
+  
+  .students-list h4 {
+    font-size: 18px;
+    color: #2d3748;
+    margin: 20px 0 15px;
+  }
+  
+  .results-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+  }
+  
+  .result-card {
+    background: #f7fafc;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    transition: transform 0.3s, box-shadow 0.3s;
+    animation: slideUp 0.3s ease-in;
+  }
+  
+  .result-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+  }
+  
+  .result-card h3 {
+    font-size: 18px;
+    color: #4a90e2;
+    margin: 0 0 8px;
+  }
+  
+  .result-card p {
+    font-size: 14px;
+    color: #718096;
+    margin: 5px 0;
+  }
+  
+  .result-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+  }
+  
+  .view-report-button, .re-exam-button {
+    padding: 8px 16px;
+    font-size: 14px;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    text-decoration: none;
+    cursor: pointer;
+    transition: transform 0.2s, background 0.3s;
+  }
+  
+  .view-report-button {
+    background: #4a90e2;
+  }
+  
+  .view-report-button:hover {
+    background: #357abd;
+    transform: scale(1.05);
+  }
+  
+  .re-exam-button {
+    background: #48bb78;
+  }
+  
+  .re-exam-button:hover {
+    background: #38a169;
+    transform: scale(1.05);
+  }
+  
+  .no-data {
+    font-size: 16px;
+    color: #718096;
+    text-align: center;
+    padding: 15px;
+  }
+  
+  .loading-spinner {
+    font-size: 24px;
+    text-align: center;
+    animation: spin 1s linear infinite;
+  }
+  
+  .error-message {
+    font-size: 20px;
+    color: #e53e3e;
+    text-align: center;
+    padding: 40px;
+  }
+  
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  
+  @keyframes slideUp {
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+  
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }

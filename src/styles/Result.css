@@ -1,123 +1,173 @@
 .result-container {
+  padding: 40px;
+  background: linear-gradient(135deg, #f7fafc, #edf2f7);
+  min-height: 100vh;
   animation: fadeIn 0.5s ease-in;
 }
 
 .result-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   background: #ffffff;
-  padding: 25px;
-  border-radius: 20px;
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-  margin-bottom: 40px;
-  text-align: center;
+  padding: 20px;
+  border-radius: 15px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  margin-bottom: 30px;
 }
 
 .result-header h1 {
-  margin: 0 0 15px;
-  font-size: 32px;
-  color: #4a90e2;
-  font-weight: 600;
-}
-
-.score {
-  font-size: 24px;
-  color: #2d3748;
-  margin: 0;
-  font-weight: 500;
-}
-
-.result-details h2 {
   font-size: 28px;
   color: #2d3748;
-  margin-bottom: 25px;
+  margin: 0;
 }
 
-.result-list {
-  list-style: none;
-  padding: 0;
+.back-button {
+  padding: 10px 20px;
+  font-size: 16px;
+  color: white;
+  background: #a0aec0;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: transform 0.2s, background 0.3s;
+}
+
+.back-button:hover {
+  background: #718096;
+  transform: scale(1.05);
+}
+
+.result-summary h2, .result-details h2 {
+  font-size: 24px;
+  color: #2d3748;
+  margin-bottom: 20px;
+}
+
+.summary-card {
+  background: #ffffff;
+  padding: 20px;
+  border-radius: 15px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s, box-shadow 0.3s;
+  animation: slideUp 0.5s ease-in;
+}
+
+.summary-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+}
+
+.summary-card p {
+  font-size: 16px;
+  color: #718096;
+  margin: 10px 0;
+}
+
+.answers-list {
   display: flex;
   flex-direction: column;
   gap: 20px;
 }
 
-.result-list li {
+.answer-card {
   background: #ffffff;
   padding: 25px;
   border-radius: 15px;
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-  transition: transform 0.3s;
+  transition: transform 0.3s, box-shadow 0.3s;
+  animation: slideUp 0.5s ease-in;
 }
 
-.result-list li:hover {
-  transform: translateY(-8px);
+.answer-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
 }
 
-.correct {
-  border-left: 6px solid #48bb78;
-}
-
-.incorrect {
-  border-left: 6px solid #f56565;
-}
-
-.result-list p {
-  margin: 8px 0;
-  font-size: 16px;
-  color: #718096;
-}
-
-.result-list strong {
-  color: #2d3748;
-}
-
-.back-button {
-  display: inline-block;
-  margin-top: 30px;
-  padding: 12px 25px;
-  background-color: #4a90e2;
-  color: white;
-  text-decoration: none;
-  border-radius: 10px;
-  font-size: 16px;
-  transition: background-color 0.3s, transform 0.2s;
-}
-
-.back-button:hover {
-  background-color: #357abd;
-  transform: scale(1.05);
-}
-
-.loading, .error, .no-data {
-  text-align: center;
-  padding: 25px;
+.answer-card h3 {
   font-size: 18px;
-  background: #ffffff;
-  border-radius: 15px;
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  color: #2d3748;
+  margin: 0 0 15px;
 }
 
-.error {
-  color: #e53e3e;
+.options {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
-.no-data {
-  color: #718096;
-}
-
-.loading {
-  color: #4a90e2;
-}
-.back-button {
-  padding: 10px 20px;
-  background-color: #a0aec0;
-  color: white;
-  border: none;
-  border-radius: 10px;
+.option {
+  padding: 10px;
+  border-radius: 8px;
   font-size: 16px;
-  cursor: pointer;
-  transition: background-color 0.3s, transform 0.2s;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: background 0.3s;
 }
 
-.back-button:hover {
-  background-color: #718096;
+.option.correct {
+  background: #c6f6d5;
+  color: #2f855a;
+}
+
+.option.incorrect {
+  background: #fed7d7;
+  color: #c53030;
+}
+
+.option:hover {
+  background: #edf2f7;
+}
+
+.option span:first-child {
+  flex: 1;
+}
+
+.status {
+  font-weight: bold;
+}
+
+.dashboard-button {
+  display: inline-block;
+  padding: 12px 24px;
+  font-size: 16px;
+  color: white;
+  background: #4a90e2;
+  border-radius: 10px;
+  text-decoration: none;
+  transition: transform 0.2s, background 0.3s;
+  margin-top: 20px;
+}
+
+.dashboard-button:hover {
+  background: #357abd;
   transform: scale(1.05);
+}
+
+.loading-spinner {
+  font-size: 24px;
+  text-align: center;
+  animation: spin 1s linear infinite;
+}
+
+.error-message {
+  font-size: 20px;
+  color: #e53e3e;
+  text-align: center;
+  padding: 40px;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }

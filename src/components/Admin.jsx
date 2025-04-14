@@ -11,6 +11,7 @@ export default function Admin() {
   const [exams, setExams] = useState([]);
   const [exam, setExam] = useState({
     title: '',
+    subject: '',
     description: '',
     questions: [{ text: '', options: ['', '', '', ''], correctAnswer: '' }],
   });
@@ -62,7 +63,7 @@ export default function Admin() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      if (!exam.title || !exam.description || exam.questions.some(q => !q.text || !q.correctAnswer)) {
+      if (!exam.title || !exam.subject || !exam.description || exam.questions.some(q => !q.text || !q.correctAnswer)) {
         setError('All fields are required');
         return;
       }
@@ -74,7 +75,7 @@ export default function Admin() {
         const docRef = await addDoc(collection(db, 'exams'), exam);
         alert('Exam added successfully! ID: ' + docRef.id);
       }
-      setExam({ title: '', description: '', questions: [{ text: '', options: ['', '', '', ''], correctAnswer: '' }] });
+      setExam({ title: '', subject: '', description: '', questions: [{ text: '', options: ['', '', '', ''], correctAnswer: '' }] });
       const examsSnapshot = await getDocs(collection(db, 'exams'));
       setExams(examsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
     } catch (err) {
@@ -104,7 +105,7 @@ export default function Admin() {
     navigate(-1);
   };
 
-  if (loading) return <div className="loading">Loading...</div>;
+  if (loading) return <div className="loading-spinner">Loading...</div>;
 
   return (
     <div className="admin-container container">
@@ -124,6 +125,15 @@ export default function Admin() {
           />
         </div>
         <div className="form-group">
+          <label>Subject</label>
+          <input
+            type="text"
+            value={exam.subject}
+            onChange={(e) => setExam({ ...exam, subject: e.target.value })}
+            placeholder="Enter subject"
+          />
+        </div>
+        <div className="form-group">
           <label>Description</label>
           <input
             type="text"
@@ -137,7 +147,7 @@ export default function Admin() {
           <div key={qIndex} className="question-card">
             <div className="form-group">
               <label>Question {qIndex + 1}</label>
-              <input
+              <textarea
                 type="text"
                 value={question.text}
                 onChange={(e) => handleQuestionChange(qIndex, 'text', e.target.value)}
@@ -182,7 +192,7 @@ export default function Admin() {
           <div className="exam-grid">
             {exams.map(exam => (
               <div key={exam.id} className="exam-item">
-                <h3>{exam.title}</h3>
+                <h3>{exam.title} ({exam.subject})</h3>
                 <p>{exam.description}</p>
                 <div className="exam-actions">
                   <button onClick={() => handleEdit(exam)} className="edit-button">Edit</button>

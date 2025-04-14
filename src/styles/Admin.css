@@ -1,40 +1,76 @@
 .admin-container {
+  padding: 40px;
+  background: linear-gradient(135deg, #f7fafc, #edf2f7);
+  min-height: 100vh;
   animation: fadeIn 0.5s ease-in;
 }
 
 .admin-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
   background: #ffffff;
-  padding: 25px;
-  border-radius: 20px;
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-  text-align: center;
-  margin-bottom: 40px;
+  padding: 20px;
+  border-radius: 15px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
 }
 
 .admin-header h1 {
+  font-size: 28px;
+  color: #2d3748;
   margin: 0;
-  font-size: 32px;
-  color: #4a90e2;
-  font-weight: 600;
+}
+
+.back-button {
+  padding: 10px 20px;
+  font-size: 16px;
+  color: white;
+  background: #a0aec0;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: transform 0.2s, background 0.3s;
+}
+
+.back-button:hover {
+  background: #718096;
+  transform: scale(1.05);
+}
+
+.error {
+  color: #e53e3e;
+  font-size: 14px;
+  text-align: center;
+  margin: 10px 0;
+  background: #fed7d7;
+  padding: 10px;
+  border-radius: 10px;
 }
 
 .admin-form {
   background: #ffffff;
   padding: 30px;
-  border-radius: 20px;
+  border-radius: 15px;
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-  display: flex;
-  flex-direction: column;
-  gap: 25px;
+  margin-bottom: 50px;
+  animation: slideUp 0.5s ease-in;
 }
 
-.form-group label, .options-group label {
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
   font-size: 16px;
   color: #2d3748;
   font-weight: 500;
+  display: block;
+  margin-bottom: 8px;
 }
 
-.form-group input, .options-group input {
+.form-group input {
+  width: 100%;
   padding: 12px;
   font-size: 16px;
   border: 2px solid #e2e8f0;
@@ -43,75 +79,83 @@
   transition: border-color 0.3s, box-shadow 0.3s;
 }
 
-.form-group input:focus, .options-group input:focus {
+.form-group input:focus {
   border-color: #4a90e2;
   box-shadow: 0 0 8px rgba(74, 144, 226, 0.3);
 }
 
-.options-group {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-}
-
 .question-card {
   background: #f7fafc;
-  padding: 25px;
-  border-radius: 15px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-  position: relative;
+  padding: 20px;
+  border-radius: 10px;
+  margin-bottom: 20px;
   transition: transform 0.3s;
 }
 
 .question-card:hover {
-  transform: translateY(-8px);
+  transform: translateY(-3px);
+}
+
+.options-group {
+  margin-bottom: 15px;
+}
+
+.options-group label {
+  font-size: 16px;
+  color: #2d3748;
+  display: block;
+  margin-bottom: 8px;
+}
+
+.options-group input {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 10px;
+  border: 2px solid #e2e8f0;
+  border-radius: 8px;
+  transition: border-color 0.3s;
+}
+
+.options-group input:focus {
+  border-color: #4a90e2;
 }
 
 .add-question-button, .save-button, .remove-button {
-  padding: 12px 25px;
+  padding: 10px 20px;
   font-size: 16px;
+  color: white;
   border: none;
   border-radius: 10px;
   cursor: pointer;
-  transition: background-color 0.3s, transform 0.2s;
+  margin-right: 10px;
+  transition: transform 0.2s, background 0.3s;
 }
 
 .add-question-button {
-  background-color: #ecc94b;
-  color: #2d3748;
+  background: #48bb78;
 }
 
 .add-question-button:hover {
-  background-color: #d69e2e;
+  background: #38a169;
   transform: scale(1.05);
 }
 
 .save-button {
-  background-color: #4a90e2;
-  color: white;
+  background: #4a90e2;
 }
 
 .save-button:hover {
-  background-color: #357abd;
+  background: #357abd;
   transform: scale(1.05);
 }
 
 .remove-button {
-  background-color: #f56565;
-  color: white;
-  position: absolute;
-  top: 15px;
-  right: 15px;
-  padding: 8px 15px;
+  background: #e53e3e;
 }
 
 .remove-button:hover {
-  background-color: #e53e3e;
+  background: #c53030;
   transform: scale(1.05);
-}
-
-.exam-list {
-  margin-top: 50px;
 }
 
 .exam-list h2 {
@@ -122,8 +166,8 @@
 
 .exam-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 25px;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
 }
 
 .exam-item {
@@ -131,93 +175,90 @@
   padding: 25px;
   border-radius: 15px;
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-  transition: transform 0.3s;
+  transition: transform 0.3s, box-shadow 0.3s;
+  animation: slideUp 0.5s ease-in;
 }
 
 .exam-item:hover {
-  transform: translateY(-8px);
+  transform: translateY(-5px);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
 }
 
 .exam-item h3 {
-  margin: 0 0 15px;
-  font-size: 22px;
+  font-size: 20px;
   color: #4a90e2;
+  margin: 0 0 10px;
 }
 
 .exam-item p {
-  margin: 0 0 20px;
   font-size: 16px;
   color: #718096;
+  margin: 0 0 15px;
 }
 
 .exam-actions {
   display: flex;
-  gap: 15px;
+  gap: 10px;
 }
 
 .edit-button, .delete-button {
-  padding: 8px 15px;
-  font-size: 14px;
+  padding: 10px 20px;
+  font-size: 16px;
+  color: white;
   border: none;
   border-radius: 10px;
   cursor: pointer;
-  transition: background-color 0.3s, transform 0.2s;
+  transition: transform 0.2s, background 0.3s;
 }
 
 .edit-button {
-  background-color: #48bb78;
-  color: white;
+  background: #4a90e2;
 }
 
 .edit-button:hover {
-  background-color: #38a169;
+  background: #357abd;
   transform: scale(1.05);
 }
 
 .delete-button {
-  background-color: #f56565;
-  color: white;
+  background: #e53e3e;
 }
 
 .delete-button:hover {
-  background-color: #e53e3e;
+  background: #c53030;
   transform: scale(1.05);
 }
 
-.error, .no-access, .no-data, .loading {
-  text-align: center;
-  padding: 25px;
+.no-data {
   font-size: 18px;
-  background: #ffffff;
-  border-radius: 15px;
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-  margin: 20px 0;
-}
-
-.error {
-  color: #e53e3e;
-}
-
-.no-access, .no-data {
   color: #718096;
+  text-align: center;
+  padding: 20px;
 }
 
-.loading {
-  color: #4a90e2;
-}
-.back-button {
-  padding: 10px 20px;
-  background-color: #a0aec0;
-  color: white;
-  border: none;
-  border-radius: 10px;
-  font-size: 16px;
-  cursor: pointer;
-  transition: background-color 0.3s, transform 0.2s;
+.loading-spinner {
+  font-size: 24px;
+  text-align: center;
+  animation: spin 1s linear infinite;
 }
 
-.back-button:hover {
-  background-color: #718096;
-  transform: scale(1.05);
+.no-access {
+  font-size: 20px;
+  color: #e53e3e;
+  text-align: center;
+  padding: 40px;
 }
 
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
