@@ -16,7 +16,6 @@ export default function Dashboard() {
   const [error, setError] = useState(null);
   const [showConfirm, setShowConfirm] = useState(false);
   const [selectedExamId, setSelectedExamId] = useState(null);
-  const [selectedResultId, setSelectedResultId] = useState(null);
   const isAdmin = currentUser?.email === 'kumarvishal00021@gmail.com';
 
   useEffect(() => {
@@ -44,11 +43,15 @@ export default function Dashboard() {
           const userIds = [...new Set(allResultsData.map(result => result.userId))];
           const users = {};
           for (const id of userIds) {
-            try {
-              const userDoc = await getDoc(doc(db, 'users', id));
-              users[id] = userDoc.exists() ? userDoc.data().name : 'Anonymous';
-            } catch (err) {
-              console.warn(`Failed to fetch user ${id}:`, err);
+            const userDoc = await getDoc(doc(db, 'users', id));
+            if (userDoc.exists()) {
+              const userData = userDoc.data();
+              users[id] = userData.name || 'Anonymous'; // Revert to 'Anonymous' as fallback
+              if (!userData.name) {
+                console.warn(`User ${id} has no name field in users collection`);
+              }
+            } else {
+              console.warn(`User document ${id} not found in users collection`);
               users[id] = 'Anonymous';
             }
           }
@@ -116,28 +119,17 @@ export default function Dashboard() {
     setSelectedExamId(null);
   };
 
-  const handleDeleteResult = async () => {
-    if (selectedResultId) {
+  const handleDeleteExam = async (examId) => {
+    if (window.confirm('Are you sure you want to delete this exam? This action cannot be undone.')) {
       try {
-        await deleteDoc(doc(db, 'results', selectedResultId));
-        setResults(results.filter(r => r.id !== selectedResultId));
-        setSelectedResultId(null);
-        alert('Result deleted successfully.');
-      } catch (error) {
-        console.error('Error deleting result:', error);
-        alert('Failed to delete result: ' + error.message);
+        await deleteDoc(doc(db, 'exams', examId));
+        setExams(exams.filter(exam => exam.id !== examId));
+        alert('Exam deleted successfully.');
+      }  catch (error) {
+        console.error('Error deleting exam:', error);
+        alert('Failed to delete exam: ' + error.message);
       }
     }
-  };
-
-  const confirmDeleteResult = () => {
-    setShowConfirm(false);
-    handleDeleteResult();
-  };
-
-  const cancelDeleteResult = () => {
-    setShowConfirm(false);
-    setSelectedResultId(null);
   };
 
   if (loading) return <div className="loading-spinner">Loading...</div>;
@@ -164,9 +156,17 @@ export default function Dashboard() {
                 <h3>{exam.title} ({exam.subject})</h3>
                 <p>{exam.description}</p>
                 {isAdmin ? (
-                  <Link to={`/admin/exam/${exam.id}/results`} className="view-results-button">
-                    View Student Results
-                  </Link>
+                  <>
+                    <Link to={`/admin/exam/${exam.id}/results`} className="view-results-button">
+                      View Student Results
+                    </Link>
+                    <button
+                      onClick={() => handleDeleteExam(exam.id)}
+                      className="delete-exam-button"
+                    >
+                      Delete Exam
+                    </button>
+                  </>
                 ) : (
                   <button
                     onClick={() => handleStartExam(exam.id)}
@@ -193,17 +193,6 @@ export default function Dashboard() {
                   <h3>{index + 1}. {student.userName}</h3>
                   <p>Exam: {student.examTitle}</p>
                   <p>Score: {student.score}/{student.totalQuestions} ({student.percentage.toFixed(2)}%)</p>
-                  {isAdmin && (
-                    <button
-                      onClick={() => {
-                        setSelectedResultId(student.id);
-                        setShowConfirm(true);
-                      }}
-                      className="delete-result-button"
-                    >
-                      Delete Result
-                    </button>
-                  )}
                 </div>
               ))
             ) : (
@@ -233,15 +222,11 @@ export default function Dashboard() {
       {showConfirm && (
         <div className="confirm-popup">
           <div className="confirm-popup-content">
-            <h2>{selectedResultId ? 'Confirm Delete' : 'Confirm Exam'}</h2>
-            <p>{selectedResultId ? 'Are you sure you want to delete this result?' : 'Are you sure you want to start this exam?'}</p>
+            <h2>Confirm Exam</h2>
+            <p>Are you sure you want to start this exam?</p>
             <div className="confirm-buttons">
-              <button onClick={selectedResultId ? confirmDeleteResult : confirmStartExam} className="confirm-button">
-                Yes
-              </button>
-              <button onClick={selectedResultId ? cancelDeleteResult : cancelStartExam} className="cancel-button">
-                No
-              </button>
+              <button onClick={confirmStartExam} className="confirm-button">Yes, Start</button>
+              <button onClick={cancelStartExam} className="cancel-button">Cancel</button>
             </div>
           </div>
         </div>

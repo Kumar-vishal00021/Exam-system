@@ -53,8 +53,8 @@ export default function Exam() {
           }
         }
 
-        // Set timer to 1 minute per question, minimum 5 minutes (300 seconds)
-        const duration = Math.max(300, examData.questions.length * 60);
+        // Set timer to half the number of questions in minutes, minimum 5 minutes (300 seconds)
+        const duration = Math.max(300, Math.ceil(examData.questions.length / 2) * 60);
         setTimeLeft(duration);
         setTimerStarted(true);
       } catch (error) {
@@ -233,51 +233,3 @@ export default function Exam() {
     </div>
   );
 }
-
-// Result Page Component (inlined for simplicity, typically separate)
-function Result() {
-  const { examId, userId } = useParams();
-  const navigate = useNavigate();
-  const [result, setResult] = useState(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchResult = async () => {
-      const resultQuery = query(
-        collection(db, 'results'),
-        where('examId', '==', examId),
-        where('userId', '==', userId)
-      );
-      const resultSnapshot = await getDocs(resultQuery);
-      if (!resultSnapshot.empty) {
-        setResult(resultSnapshot.docs[0].data());
-      }
-      setLoading(false);
-    };
-    fetchResult();
-  }, [examId, userId]);
-
-  if (loading) return <div className="loading-spinner">Loading...</div>;
-  if (!result) return <div className="error-message">Result not found.</div>;
-
-  return (
-    <div className="exam-container container">
-      <header className="exam-header sticky-header">
-        <h1>Exam Result</h1>
-        <div className="exam-controls">
-          <button onClick={() => navigate('/dashboard')} className="back-button">
-            Back to Dashboard
-          </button>
-        </div>
-      </header>
-      <section className="questions-section">
-        <div className="question-card">
-          <h2>Result for {result.examTitle}</h2>
-          <p>Score: {result.score}/{result.totalQuestions} ({((result.score / result.totalQuestions) * 100).toFixed(2)}%)</p>
-        </div>
-      </section>
-    </div>
-  );
-}
-
-export { Exam, Result };
