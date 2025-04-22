@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { db, auth } from '../firebase/firebaseConfig';
-import { collection, getDocs, query, where, doc, getDoc } from 'firebase/firestore';
+import { collection, getDocs, query, where, doc, getDoc, deleteDoc } from 'firebase/firestore';
 import { signOut } from 'firebase/auth';
 import { useAuth } from '../context/AuthContext';
 import '../styles/Dashboard.css';
@@ -13,30 +13,45 @@ export default function Dashboard() {
   const [results, setResults] = useState([]);
   const [topStudents, setTopStudents] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [selectedExamId, setSelectedExamId] = useState(null);
+  const [selectedResultId, setSelectedResultId] = useState(null);
   const isAdmin = currentUser?.email === 'kumarvishal00021@gmail.com';
 
   useEffect(() => {
     const fetchData = async () => {
-      if (!currentUser) return;
+      if (!currentUser) {
+        setError('Please sign in to view the dashboard.');
+        setLoading(false);
+        return;
+      }
 
       try {
-        // Fetch exams (available to all)
+        // Fetch exams
         const examsSnapshot = await getDocs(collection(db, 'exams'));
         setExams(examsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
 
         if (isAdmin) {
-          // Fetch all results for top students calculation
+          // Fetch all results for admin
           const allResultsSnapshot = await getDocs(collection(db, 'results'));
-          const allResultsData = allResultsSnapshot.docs.map(doc => doc.data());
+          const allResultsData = allResultsSnapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data(),
+          }));
 
           // Fetch user names
           const userIds = [...new Set(allResultsData.map(result => result.userId))];
-          const usersSnapshot = await Promise.all(
-            userIds.map(id => getDoc(doc(db, 'users', id)))
-          );
-          const users = Object.fromEntries(
-            usersSnapshot.map(snap => [snap.id, snap.exists() ? snap.data().name : 'Anonymous'])
-          );
+          const users = {};
+          for (const id of userIds) {
+            try {
+              const userDoc = await getDoc(doc(db, 'users', id));
+              users[id] = userDoc.exists() ? userDoc.data().name : 'Anonymous';
+            } catch (err) {
+              console.warn(`Failed to fetch user ${id}:`, err);
+              users[id] = 'Anonymous';
+            }
+          }
 
           // Calculate top 3 students
           const enrichedResults = allResultsData.map(result => ({
@@ -49,19 +64,22 @@ export default function Dashboard() {
             .slice(0, 3);
           setTopStudents(sortedResults);
         } else {
-          // Fetch only user's results
+          // Fetch user's results
           const resultsQuery = query(
             collection(db, 'results'),
             where('userId', '==', currentUser.uid)
           );
           const resultsSnapshot = await getDocs(resultsQuery);
-          setResults(resultsSnapshot.docs.map(doc => ({
-            ...doc.data(),
-            percentage: (doc.data().score / doc.data().totalQuestions) * 100,
-          })));
+          setResults(
+            resultsSnapshot.docs.map(doc => ({
+              ...doc.data(),
+              percentage: (doc.data().score / doc.data().totalQuestions) * 100,
+            }))
+          );
         }
       } catch (error) {
         console.error('Dashboard fetch error:', error);
+        setError('Failed to load dashboard: ' + error.message);
       } finally {
         setLoading(false);
       }
@@ -75,6 +93,7 @@ export default function Dashboard() {
       navigate('/login');
     } catch (error) {
       console.error('Logout error:', error);
+      alert('Failed to log out: ' + error.message);
     }
   };
 
@@ -82,7 +101,47 @@ export default function Dashboard() {
     navigate(-1);
   };
 
+  const handleStartExam = (examId) => {
+    setSelectedExamId(examId);
+    setShowConfirm(true);
+  };
+
+  const confirmStartExam = () => {
+    setShowConfirm(false);
+    navigate(`/exam/${selectedExamId}`);
+  };
+
+  const cancelStartExam = () => {
+    setShowConfirm(false);
+    setSelectedExamId(null);
+  };
+
+  const handleDeleteResult = async () => {
+    if (selectedResultId) {
+      try {
+        await deleteDoc(doc(db, 'results', selectedResultId));
+        setResults(results.filter(r => r.id !== selectedResultId));
+        setSelectedResultId(null);
+        alert('Result deleted successfully.');
+      } catch (error) {
+        console.error('Error deleting result:', error);
+        alert('Failed to delete result: ' + error.message);
+      }
+    }
+  };
+
+  const confirmDeleteResult = () => {
+    setShowConfirm(false);
+    handleDeleteResult();
+  };
+
+  const cancelDeleteResult = () => {
+    setShowConfirm(false);
+    setSelectedResultId(null);
+  };
+
   if (loading) return <div className="loading-spinner">Loading...</div>;
+  if (error) return <div className="error-message">{error}</div>;
 
   return (
     <div className="dashboard container">
@@ -109,9 +168,12 @@ export default function Dashboard() {
                     View Student Results
                   </Link>
                 ) : (
-                  <Link to={`/exam/${exam.id}`} className="start-exam-button">
+                  <button
+                    onClick={() => handleStartExam(exam.id)}
+                    className="start-exam-button"
+                  >
                     Start Exam
-                  </Link>
+                  </button>
                 )}
               </div>
             ))
@@ -131,6 +193,17 @@ export default function Dashboard() {
                   <h3>{index + 1}. {student.userName}</h3>
                   <p>Exam: {student.examTitle}</p>
                   <p>Score: {student.score}/{student.totalQuestions} ({student.percentage.toFixed(2)}%)</p>
+                  {isAdmin && (
+                    <button
+                      onClick={() => {
+                        setSelectedResultId(student.id);
+                        setShowConfirm(true);
+                      }}
+                      className="delete-result-button"
+                    >
+                      Delete Result
+                    </button>
+                  )}
                 </div>
               ))
             ) : (
@@ -155,6 +228,23 @@ export default function Dashboard() {
             )}
           </div>
         </section>
+      )}
+
+      {showConfirm && (
+        <div className="confirm-popup">
+          <div className="confirm-popup-content">
+            <h2>{selectedResultId ? 'Confirm Delete' : 'Confirm Exam'}</h2>
+            <p>{selectedResultId ? 'Are you sure you want to delete this result?' : 'Are you sure you want to start this exam?'}</p>
+            <div className="confirm-buttons">
+              <button onClick={selectedResultId ? confirmDeleteResult : confirmStartExam} className="confirm-button">
+                Yes
+              </button>
+              <button onClick={selectedResultId ? cancelDeleteResult : cancelStartExam} className="cancel-button">
+                No
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
