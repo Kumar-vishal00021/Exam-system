@@ -1,70 +1,59 @@
+
+
+
 import { useEffect, useState } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import { db } from '../firebase/firebaseConfig';
-import { collection, query, where, getDocs, doc, updateDoc, getDoc } from 'firebase/firestore';
-import '../styles/AdminExamResults.css';
+import { collection, getDocs, query, where, doc, deleteDoc, updateDoc,getDoc } from 'firebase/firestore';
+import '../styles/Dashboard.css';
 
 export default function AdminExamResults() {
   const { examId } = useParams();
   const navigate = useNavigate();
+  const [results, setResults] = useState([]);
   const [exam, setExam] = useState(null);
-  const [stats, setStats] = useState({});
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchResults = async () => {
+      const examDoc = await getDoc(doc(db, 'exams', examId));
+          if (examDoc.exists()) {
+            setExam(examDoc.data());
+          }
       try {
-        // Fetch exam details
-        const examDoc = await getDoc(doc(db, 'exams', examId));
-        if (examDoc.exists()) {
-          setExam(examDoc.data());
-        }
-
-        // Fetch results for this exam
         const resultsQuery = query(collection(db, 'results'), where('examId', '==', examId));
         const resultsSnapshot = await getDocs(resultsQuery);
-        const resultsData = resultsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        const resultsData = resultsSnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
 
-        // Fetch user names
         const userIds = [...new Set(resultsData.map(result => result.userId))];
-        const usersSnapshot = await Promise.all(
-          userIds.map(id => getDoc(doc(db, 'users', id)))
-        );
-        const users = Object.fromEntries(
-          usersSnapshot.map(snap => [snap.id, snap.exists() ? snap.data().name : 'Anonymous'])
-        );
-
-        // Calculate stats (students per date with full details)
-        const statsByDate = resultsData.reduce((acc, result) => {
-          const date = new Date(result.timestamp?.toDate()).toLocaleDateString('en-US', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric',
-          });
-          if (!acc[date]) {
-            acc[date] = {
-              count: 0,
-              subject: result.subject,
-              students: [],
-            };
+        const users = {};
+        for (const id of userIds) {
+          const userDoc = await getDoc(doc(db, 'users', id));
+          if (userDoc.exists()) {
+            const userData = userDoc.data();
+            users[id] = userData.name || 'Anonymous';
+            if (!userData.name) {
+              console.warn(`User ${id} has no name field in users collection`);
+            }
+          } else {
+            console.warn(`User document ${id} not found in users collection`);
+            users[id] = 'Anonymous';
           }
-          acc[date].count += 1;
-          acc[date].students.push({
-            id: result.id,
-            userId: result.userId,
-            userName: users[result.userId] || 'Anonymous',
-            score: result.score,
-            totalQuestions: result.totalQuestions,
-            percentage: (result.score / result.totalQuestions) * 100,
-            timestamp: result.timestamp,
-            reExamAllowed: result.reExamAllowed || false,
-          });
-          return acc;
-        }, {});
-        setStats(statsByDate);
+        }
+
+        const enrichedResults = resultsData.map(result => ({
+          ...result,
+          userName: users[result.userId] || 'Anonymous',
+          percentage: (result.score / result.totalQuestions) * 100,
+        }));
+        setResults(enrichedResults);
       } catch (error) {
         console.error('Error fetching results:', error);
-        alert('Failed to load results: ' + error.message);
+        setError('Failed to load results: ' + error.message);
       } finally {
         setLoading(false);
       }
@@ -72,90 +61,81 @@ export default function AdminExamResults() {
     fetchResults();
   }, [examId]);
 
-  const allowReExam = async (resultId, date) => {
-    try {
-      await updateDoc(doc(db, 'results', resultId), { reExamAllowed: true });
-      setStats(prev => ({
-        ...prev,
-        [date]: {
-          ...prev[date],
-          students: prev[date].students.map(student =>
-            student.id === resultId ? { ...student, reExamAllowed: true } : student
-          ),
-        },
-      }));
-      alert('Re-exam allowed for this student.');
-    } catch (error) {
-      console.error('Error allowing re-exam:', error);
-      alert('Failed to allow re-exam: ' + error.message);
+  const handleDeleteResult = async (resultId) => {
+    if (window.confirm('Are you sure you want to delete this result?')) {
+      try {
+        await deleteDoc(doc(db, 'results', resultId));
+        setResults(results.filter(result => result.id !== resultId));
+        alert('Result deleted successfully.');
+      } catch (error) {
+        console.error('Error deleting result:', error);
+        alert('Failed to delete result: ' + error.message);
+      }
     }
   };
 
-  const handleBack = () => {
-    navigate(-1);
+  const handleViewReport = (examId, userId) => {
+    navigate(`/result/${examId}/${userId}`);
+  };
+
+  const handleAllowReExam = async (resultId) => {
+    if (window.confirm('Allow this student to retake the exam?')) {
+      try {
+        await updateDoc(doc(db, 'results', resultId), { reExamAllowed: true });
+        const updatedResults = results.map(result =>
+          result.id === resultId ? { ...result, reExamAllowed: true } : result
+        );
+        setResults(updatedResults);
+        alert('Re-exam allowed successfully.');
+      } catch (error) {
+        console.error('Error allowing re-exam:', error);
+        alert('Failed to allow re-exam: ' + error.message);
+      }
+    }
   };
 
   if (loading) return <div className="loading-spinner">Loading...</div>;
-  if (!exam) return <div className="error-message">Exam not found.</div>;
+  if (error) return <div className="error-message">{error}</div>;
 
   return (
-    <div className="admin-exam-results-container container">
-      <header className="results-header">
-        <button onClick={handleBack} className="back-button">Back</button>
-        <h1>Student Results for {exam.title} ({exam.subject})</h1>
+    <div className="dashboard container">
+      <header className="dashboard-header">
+        <button onClick={() => navigate('/dashboard')} className="back-button">Back</button>
+        <h1>Student Results for Exam {exam.title}</h1>
       </header>
-
-      <section className="stats-section">
-        <h2>Exam Participation by Date</h2>
-        <div className="stats-list">
-          {Object.entries(stats).length > 0 ? (
-            Object.entries(stats)
-              .sort(([dateA], [dateB]) => new Date(dateB) - new Date(dateA))
-              .map(([date, { count, subject, students }], index) => (
-                <div key={index} className="stats-card">
-                  <h3>
-                    {date} ({count} {count === 1 ? 'student' : 'students'} attended)
-                  </h3>
-                  <p>Subject: {subject}</p>
-                  <div className="students-list">
-                    <h4>Student Results:</h4>
-                    {students.length > 0 ? (
-                      <div className="results-grid">
-                        {students.map((student, idx) => (
-                          <div key={idx} className="result-card">
-                            <h3>{student.userName}</h3>
-                            <p>
-                              Score: {student.score}/{student.totalQuestions} (
-                              {student.percentage.toFixed(2)}%)
-                            </p>
-                            <p>Date: {new Date(student.timestamp?.toDate()).toLocaleString()}</p>
-                            <div className="result-actions">
-                              <Link
-                                to={`/result/${examId}/${student.userId}`}
-                                className="view-report-button"
-                              >
-                                View Report
-                              </Link>
-                              {!student.reExamAllowed && (
-                                <button
-                                  onClick={() => allowReExam(student.id, date)}
-                                  className="re-exam-button"
-                                >
-                                  Allow Re-Exam
-                                </button>
-                              )}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <p className="no-data">No students attended.</p>
-                    )}
-                  </div>
+      <section className="top-students-section">
+        <h2>Student Results</h2>
+        <div className="top-students-list">
+          {results.length > 0 ? (
+            results.map((result, index) => (
+              <div key={index} className="top-student-item">
+                <h3>{index + 1}. {result.userName}</h3>
+                <p>Exam: {result.examTitle}</p>
+                <p>Score: {result.score}/{result.totalQuestions} ({result.percentage.toFixed(2)}%)</p>
+                <div className="result-actions">
+                  <button
+                    onClick={() => handleDeleteResult(result.id)}
+                    className="delete-result-button"
+                  >
+                    Delete Result
+                  </button>
+                  <button
+                    onClick={() => handleViewReport(result.examId, result.userId)}
+                    className="view-report-button"
+                  >
+                    View Report
+                  </button>
+                  <button
+                    onClick={() => handleAllowReExam(result.id)}
+                    className="reexam-button"
+                  >
+                    Allow Re-Exam
+                  </button>
                 </div>
-              ))
+              </div>
+            ))
           ) : (
-            <p className="no-data">No participation data available.</p>
+            <p className="no-data">No results yet.</p>
           )}
         </div>
       </section>

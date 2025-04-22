@@ -16,6 +16,7 @@ export default function Exam() {
   const [timeLeft, setTimeLeft] = useState(null);
   const [timerStarted, setTimerStarted] = useState(false);
   const [showExitConfirm, setShowExitConfirm] = useState(false);
+  const [isSubmitted, setIsSubmitted] = useState(false);
 
   useEffect(() => {
     const fetchExam = async () => {
@@ -53,7 +54,6 @@ export default function Exam() {
           }
         }
 
-        // Set timer to half the number of questions in minutes, minimum 5 minutes (300 seconds)
         const duration = Math.max(300, Math.ceil(examData.questions.length / 2) * 60);
         setTimeLeft(duration);
         setTimerStarted(true);
@@ -85,9 +85,9 @@ export default function Exam() {
 
   useEffect(() => {
     const handleBeforeUnload = (e) => {
-      if (Object.keys(answers).length > 0) {
-        const message = 'Leaving the page will submit your answers.';
-        e.returnValue = message; // For older browsers
+      if (!isSubmitted) {
+        const message = 'Leaving the page will submit your exam. Are you sure?';
+        e.returnValue = message;
         if (typeof e.returnValue !== 'undefined' && !window.confirm(message)) {
           e.preventDefault();
           return false;
@@ -97,32 +97,33 @@ export default function Exam() {
     };
 
     const handlePopState = (e) => {
-      if (Object.keys(answers).length > 0) {
+      if (!isSubmitted) {
         setShowExitConfirm(true);
         e.preventDefault();
         window.history.pushState(null, null, window.location.pathname);
-      } else {
-        navigate(-1);
       }
     };
 
     window.addEventListener('beforeunload', handleBeforeUnload);
     window.addEventListener('popstate', handlePopState);
 
-    // Prevent initial popstate trigger
     window.history.pushState(null, null, window.location.pathname);
 
     return () => {
       window.removeEventListener('beforeunload', handleBeforeUnload);
       window.removeEventListener('popstate', handlePopState);
     };
-  }, [answers, navigate]);
+  }, [isSubmitted]);
 
   const handleAnswerChange = (questionIndex, option) => {
     setAnswers(prev => ({ ...prev, [questionIndex]: option }));
   };
 
   const handleSubmit = async (isAutoSubmit = false) => {
+    if (isSubmitted) {
+      alert('Exam has already been submitted.');
+      return;
+    }
     if (!isAutoSubmit && Object.keys(answers).length < exam.questions.length) {
       if (!window.confirm('Some questions are unanswered. Submit anyway?')) {
         return;
@@ -149,6 +150,7 @@ export default function Exam() {
       };
 
       await setDoc(doc(collection(db, 'results')), resultData);
+      setIsSubmitted(true);
       navigate(`/result/${examId}/${currentUser.uid}`);
     } catch (error) {
       console.error('Error submitting exam:', error);
@@ -157,7 +159,7 @@ export default function Exam() {
   };
 
   const handleExit = () => {
-    if (Object.keys(answers).length > 0) {
+    if (!isSubmitted) {
       setShowExitConfirm(true);
     } else {
       navigate('/dashboard');
@@ -188,11 +190,13 @@ export default function Exam() {
       <header className="exam-header sticky-header">
         <h1>{exam.title} ({exam.subject})</h1>
         <div className="exam-controls">
-          <button onClick={() => handleSubmit(false)} className="submit-button">
+          <button onClick={() => handleSubmit(false)} className="submit-button" disabled={isSubmitted}>
             Submit Exam
           </button>
           <div className="timer">Time Left: {formatTime(timeLeft)}</div>
-          <button onClick={handleExit} className="exit-button">Exit</button>
+          <button onClick={handleExit} className="exit-button" disabled={isSubmitted}>
+            Exit
+          </button>
         </div>
       </header>
       <section className="questions-section">
@@ -210,6 +214,7 @@ export default function Exam() {
                     value={option}
                     checked={answers[index] === option}
                     onChange={() => handleAnswerChange(index, option)}
+                    disabled={isSubmitted}
                   />
                   {option}
                 </label>
@@ -222,7 +227,7 @@ export default function Exam() {
         <div className="confirm-popup">
           <div className="confirm-popup-content">
             <h2>Confirm Exit</h2>
-            <p>Exiting will submit your answers. Are you sure?</p>
+            <p>Exiting will submit your exam. Are you sure?</p>
             <div className="confirm-buttons">
               <button onClick={confirmExit} className="confirm-button">Yes</button>
               <button onClick={cancelExit} className="cancel-button">No</button>

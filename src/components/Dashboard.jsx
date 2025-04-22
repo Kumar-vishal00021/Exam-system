@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { db, auth } from '../firebase/firebaseConfig';
-import { collection, getDocs, query, where, doc, getDoc, deleteDoc } from 'firebase/firestore';
+import { collection, getDocs, query, where, doc, getDoc, deleteDoc, updateDoc } from 'firebase/firestore';
 import { signOut } from 'firebase/auth';
 import { useAuth } from '../context/AuthContext';
 import '../styles/Dashboard.css';
@@ -27,26 +27,23 @@ export default function Dashboard() {
       }
 
       try {
-        // Fetch exams
         const examsSnapshot = await getDocs(collection(db, 'exams'));
         setExams(examsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
 
         if (isAdmin) {
-          // Fetch all results for admin
           const allResultsSnapshot = await getDocs(collection(db, 'results'));
           const allResultsData = allResultsSnapshot.docs.map(doc => ({
             id: doc.id,
             ...doc.data(),
           }));
 
-          // Fetch user names
           const userIds = [...new Set(allResultsData.map(result => result.userId))];
           const users = {};
           for (const id of userIds) {
             const userDoc = await getDoc(doc(db, 'users', id));
             if (userDoc.exists()) {
               const userData = userDoc.data();
-              users[id] = userData.name || 'Anonymous'; // Revert to 'Anonymous' as fallback
+              users[id] = userData.name || 'Anonymous';
               if (!userData.name) {
                 console.warn(`User ${id} has no name field in users collection`);
               }
@@ -56,7 +53,6 @@ export default function Dashboard() {
             }
           }
 
-          // Calculate top 3 students
           const enrichedResults = allResultsData.map(result => ({
             ...result,
             userName: users[result.userId] || 'Anonymous',
@@ -67,7 +63,6 @@ export default function Dashboard() {
             .slice(0, 3);
           setTopStudents(sortedResults);
         } else {
-          // Fetch user's results
           const resultsQuery = query(
             collection(db, 'results'),
             where('userId', '==', currentUser.uid)
@@ -125,9 +120,42 @@ export default function Dashboard() {
         await deleteDoc(doc(db, 'exams', examId));
         setExams(exams.filter(exam => exam.id !== examId));
         alert('Exam deleted successfully.');
-      }  catch (error) {
+      } catch (error) {
         console.error('Error deleting exam:', error);
         alert('Failed to delete exam: ' + error.message);
+      }
+    }
+  };
+
+  const handleDeleteResult = async (resultId) => {
+    if (window.confirm('Are you sure you want to delete this result?')) {
+      try {
+        await deleteDoc(doc(db, 'results', resultId));
+        setTopStudents(topStudents.filter(student => student.id !== resultId));
+        alert('Result deleted successfully.');
+      } catch (error) {
+        console.error('Error deleting result:', error);
+        alert('Failed to delete result: ' + error.message);
+      }
+    }
+  };
+
+  const handleViewReport = (examId, userId) => {
+    navigate(`/result/${examId}/${userId}`);
+  };
+
+  const handleAllowReExam = async (resultId) => {
+    if (window.confirm('Allow this student to retake the exam?')) {
+      try {
+        await updateDoc(doc(db, 'results', resultId), { reExamAllowed: true });
+        const updatedStudents = topStudents.map(student =>
+          student.id === resultId ? { ...student, reExamAllowed: true } : student
+        );
+        setTopStudents(updatedStudents);
+        alert('Re-exam allowed successfully.');
+      } catch (error) {
+        console.error('Error allowing re-exam:', error);
+        alert('Failed to allow re-exam: ' + error.message);
       }
     }
   };
@@ -193,6 +221,26 @@ export default function Dashboard() {
                   <h3>{index + 1}. {student.userName}</h3>
                   <p>Exam: {student.examTitle}</p>
                   <p>Score: {student.score}/{student.totalQuestions} ({student.percentage.toFixed(2)}%)</p>
+                  <div className="result-actions">
+                    <button
+                      onClick={() => handleDeleteResult(student.id)}
+                      className="delete-result-button"
+                    >
+                      Delete Result
+                    </button>
+                    <button
+                      onClick={() => handleViewReport(student.examId, student.userId)}
+                      className="view-report-button"
+                    >
+                      View Report
+                    </button>
+                    <button
+                      onClick={() => handleAllowReExam(student.id)}
+                      className="reexam-button"
+                    >
+                      Allow Re-Exam
+                    </button>
+                  </div>
                 </div>
               ))
             ) : (
@@ -210,6 +258,12 @@ export default function Dashboard() {
                   <h3>{result.examTitle}</h3>
                   <p>Score: {result.score}/{result.totalQuestions} ({result.percentage.toFixed(2)}%)</p>
                   <small>{new Date(result.timestamp?.toDate()).toLocaleString()}</small>
+                  <Link
+                    to={`/result/${result.examId}/${currentUser.uid}`}
+                    className="view-detailed-button"
+                  >
+                    View Detailed Results
+                  </Link>
                 </div>
               ))
             ) : (
