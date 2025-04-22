@@ -16,6 +16,7 @@ export default function Exam() {
   const [timeLeft, setTimeLeft] = useState(null);
   const [timerStarted, setTimerStarted] = useState(false);
   const [showExitConfirm, setShowExitConfirm] = useState(false);
+  const [showReExamPopup, setShowReExamPopup] = useState(false); // New state for re-exam popup
   const [isSubmitted, setIsSubmitted] = useState(false);
 
   useEffect(() => {
@@ -48,9 +49,8 @@ export default function Exam() {
         if (!resultSnapshot.empty) {
           const resultData = resultSnapshot.docs[0].data();
           if (!resultData.reExamAllowed) {
-            setError('You have already taken this exam. Please ask an admin for re-exam permission.');
-            navigate('/dashboard');
-            return;
+            setShowReExamPopup(true); // Show popup if exam taken without permission
+            return; // Stop further execution
           }
         }
 
@@ -175,6 +175,11 @@ export default function Exam() {
     setShowExitConfirm(false);
   };
 
+  const closeReExamPopup = () => {
+    setShowReExamPopup(false);
+    navigate('/dashboard'); // Return to dashboard after closing popup
+  };
+
   const formatTime = (seconds) => {
     const minutes = Math.floor(seconds / 60);
     const secs = seconds % 60;
@@ -231,6 +236,17 @@ export default function Exam() {
             <div className="confirm-buttons">
               <button onClick={confirmExit} className="confirm-button">Yes</button>
               <button onClick={cancelExit} className="cancel-button">No</button>
+            </div>
+          </div>
+        </div>
+      )}
+      {showReExamPopup && (
+        <div className="confirm-popup">
+          <div className="confirm-popup-content">
+            <h2>Exam Already Taken</h2>
+            <p>You have already taken this exam. Please contact the admin (<a href="mailto:kumarvishal00021@gmail.com">kumarvishal00021@gmail.com</a>) to request a re-exam.</p>
+            <div className="confirm-buttons">
+              <button onClick={closeReExamPopup} className="confirm-button">OK</button>
             </div>
           </div>
         </div>
