@@ -53,6 +53,7 @@ export default function Result() {
       <header className="result-header">
         <button onClick={handleBack} className="back-button">Back</button>
         <h1>Result for {exam.title} ({exam.subject})</h1>
+        <Link to="/dashboard" className="dashboard-button">Back to Dashboard</Link>
       </header>
       <section className="result-summary">
         <h2>Summary</h2>
