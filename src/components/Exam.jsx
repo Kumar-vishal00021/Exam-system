@@ -16,8 +16,9 @@ export default function Exam() {
   const [timeLeft, setTimeLeft] = useState(null);
   const [timerStarted, setTimerStarted] = useState(false);
   const [showExitConfirm, setShowExitConfirm] = useState(false);
-  const [showReExamPopup, setShowReExamPopup] = useState(false); // New state for re-exam popup
+  const [showReExamPopup, setShowReExamPopup] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [emailSentMessage, setEmailSentMessage] = useState(''); // New state for email confirmation
 
   useEffect(() => {
     const fetchExam = async () => {
@@ -151,6 +152,7 @@ export default function Exam() {
 
       await setDoc(doc(collection(db, 'results')), resultData);
       setIsSubmitted(true);
+      setEmailSentMessage('An email with your exam results has been sent to your registered email address.'); // Confirmation message
       navigate(`/result/${examId}/${currentUser.uid}`);
     } catch (error) {
       console.error('Error submitting exam:', error);
@@ -228,6 +230,11 @@ export default function Exam() {
           </div>
         ))}
       </section>
+      {emailSentMessage && (
+        <div className="email-sent-message">
+          {emailSentMessage}
+        </div>
+      )}
       {showExitConfirm && (
         <div className="confirm-popup">
           <div className="confirm-popup-content">
