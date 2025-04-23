@@ -26,7 +26,10 @@
   align-items: center;
   gap: 15px;
 }
-
+.sticky-header{
+  position: sticky;
+  top: 0px;
+}
 .submit-button,
 .exit-button {
   padding: 10px 20px;

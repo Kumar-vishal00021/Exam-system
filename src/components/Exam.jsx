@@ -229,6 +229,9 @@ export default function Exam() {
             </div>
           </div>
         ))}
+        <button onClick={() => handleSubmit(false)} className="submit-button" disabled={isSubmitted}>
+            Submit Exam
+          </button>
       </section>
       {emailSentMessage && (
         <div className="email-sent-message">
