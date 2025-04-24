@@ -45,7 +45,12 @@ export default function Result() {
     navigate(-1);
   };
 
-  if (loading) return <div className="loading-spinner">Loading...</div>;
+  if (loading) return (
+    <div className="loader-container">
+      <p className="loader-text">Please Wait! Your Reasult is Loading...</p>
+      <div className="loader"></div>
+    </div>
+  );
   if (!result || !exam) return <div className="error-message">No result found.</div>;
 
   return (

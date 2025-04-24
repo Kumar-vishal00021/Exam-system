@@ -31,9 +31,12 @@ export function AuthProvider({ children }) {
     return unsubscribe;
   }, []);
 
-  if (loading) {
-    return <div>Loading authentication...</div>;
-  }
+  if (loading) return (
+    <div className="loader-container">
+      <p className="loader-text">Please Wait! Authentication in Progress....</p>
+      <div className="loader"></div>
+    </div>
+  );
 
   return (
     <AuthContext.Provider value={{ currentUser, loading }}>

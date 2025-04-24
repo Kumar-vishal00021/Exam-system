@@ -160,7 +160,12 @@ export default function Dashboard() {
     }
   };
 
-  if (loading) return <div className="loading-spinner">Loading...</div>;
+  if (loading) return (
+    <div className="loader-container">
+      <p className="loader-text">Please Wait Your Dashboard is Loading...</p>
+      <div className="loader"></div>
+    </div>
+  );
   if (error) return <div className="error-message">{error}</div>;
 
   return (

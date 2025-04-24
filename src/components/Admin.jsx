@@ -105,8 +105,12 @@ export default function Admin() {
     navigate(-1);
   };
 
-  if (loading) return <div className="loading-spinner">Loading...</div>;
-
+  if (loading) return (
+    <div className="loader-container">
+      <p className="loader-text">Please Wait! Admin Dashboard is Loading...</p>
+      <div className="loader"></div>
+    </div>
+  );
   return (
     <div className="admin-container container">
       <header className="admin-header">

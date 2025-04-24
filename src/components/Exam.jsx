@@ -152,7 +152,7 @@ export default function Exam() {
 
       await setDoc(doc(collection(db, 'results')), resultData);
       setIsSubmitted(true);
-      setEmailSentMessage('An email with your exam results has been sent to your registered email address.'); // Confirmation message
+      setEmailSentMessage('An email with your exam results has been sent to your registered email address.');
       navigate(`/result/${examId}/${currentUser.uid}`);
     } catch (error) {
       console.error('Error submitting exam:', error);
@@ -188,7 +188,12 @@ export default function Exam() {
     return `${minutes}:${secs < 10 ? '0' : ''}${secs}`;
   };
 
-  if (loading) return <div className="loading-spinner">Loading...</div>;
+  if (loading) return (
+    <div className="loader-container">
+      <p className="loader-text">Please Wait! Your Exam is Loading...</p>
+      <div className="loader"></div>
+    </div>
+  );
   if (error) return <div className="error-message">{error}</div>;
   if (!exam) return <div className="error-message">Exam not found.</div>;
 

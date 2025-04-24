@@ -1,10 +1,7 @@
-
-
-
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { db } from '../firebase/firebaseConfig';
-import { collection, getDocs, query, where, doc, deleteDoc, updateDoc,getDoc } from 'firebase/firestore';
+import { collection, getDocs, query, where, doc, deleteDoc, updateDoc, getDoc } from 'firebase/firestore';
 import '../styles/Dashboard.css';
 
 export default function AdminExamResults() {
@@ -18,9 +15,9 @@ export default function AdminExamResults() {
   useEffect(() => {
     const fetchResults = async () => {
       const examDoc = await getDoc(doc(db, 'exams', examId));
-          if (examDoc.exists()) {
-            setExam(examDoc.data());
-          }
+      if (examDoc.exists()) {
+        setExam(examDoc.data());
+      }
       try {
         const resultsQuery = query(collection(db, 'results'), where('examId', '==', examId));
         const resultsSnapshot = await getDocs(resultsQuery);
@@ -94,14 +91,19 @@ export default function AdminExamResults() {
     }
   };
 
-  if (loading) return <div className="loading-spinner">Loading...</div>;
+  if (loading) return (
+    <div className="loader-container">
+      <p className="loader-text">Please Wait! Results is Loading...</p>
+      <div className="loader"></div>
+    </div>
+  );
   if (error) return <div className="error-message">{error}</div>;
 
   return (
     <div className="dashboard container">
       <header className="dashboard-header">
         <button onClick={() => navigate('/dashboard')} className="back-button">Back</button>
-        <h1>Student Results for Exam {exam.title}</h1>
+        <h1>Student Results for Exam {exam?.title || 'Loading...'}</h1>
       </header>
       <section className="top-students-section">
         <h2>Student Results</h2>
