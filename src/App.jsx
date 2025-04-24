@@ -7,6 +7,8 @@ import Dashboard from './components/Dashboard';
 import Exam from './components/Exam';
 import Result from './components/Result';
 import Admin from './components/Admin';
+import Contact from './components/Contact';
+import About from './components/About';
 import AdminExamResults from './components/AdminExamResults'; // New component for admin results view
 import './styles/App.css';
 
@@ -27,6 +29,8 @@ function AppContent() {
           <Route path="/result/:examId/:userId" element={<Result />} />
           <Route path="/admin" element={<Admin />} />
           <Route path="/admin/exam/:examId/results" element={<AdminExamResults />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/contact" element={<Contact />} />
         </Route>
 
         {/* Fallback route */}
@@ -43,3 +47,4 @@ export default function App() {
     </Router>
   );
 }
+
