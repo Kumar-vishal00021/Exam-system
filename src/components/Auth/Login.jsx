@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { auth, googleProvider } from '../../firebase/firebaseConfig';
-import { signInWithEmailAndPassword, signInWithPopup, signInWithPhoneNumber, RecaptchaVerifier } from 'firebase/auth';
+import { signInWithEmailAndPassword, signInWithPopup, signInWithPhoneNumber, RecaptchaVerifier, sendPasswordResetEmail } from 'firebase/auth';
 import { doc, setDoc } from 'firebase/firestore';
 import { db } from '../../firebase/firebaseConfig';
 import './Auth.css';
@@ -13,6 +13,8 @@ export default function Login() {
   const [otp, setOtp] = useState('');
   const [verificationId, setVerificationId] = useState('');
   const [error, setError] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
   const navigate = useNavigate();
 
   const handleEmailLogin = async (e) => {
@@ -92,21 +94,82 @@ export default function Login() {
     }
   };
 
+  const handleForgotPassword = async (e) => {
+    e.preventDefault();
+    if (!email) {
+      setError('Please enter your email address to reset your password.');
+      return;
+    }
+    try {
+      await sendPasswordResetEmail(auth, email);
+      setSuccessMessage('Password reset email sent! Please check your inbox.');
+      setError('');
+      setShowForgotPassword(false);
+    } catch (err) {
+      setError(err.message);
+      setSuccessMessage('');
+    }
+  };
+
   return (
     <div className="auth-container">
       <div className="auth-card">
         <h2>Login</h2>
 
-        <form onSubmit={handleEmailLogin}>
+        <form onSubmit={showForgotPassword ? handleForgotPassword : handleEmailLogin}>
           <div className="form-group">
             <label>Email</label>
-            <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Enter your email" required />
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Enter your email"
+              required
+            />
           </div>
-          <div className="form-group">
-            <label>Password</label>
-            <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Enter your password" required />
-          </div>
-          <button type="submit" className="auth-button">Login with Email</button>
+          {!showForgotPassword && (
+            <div className="form-group">
+              <label>Password</label>
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Enter your password"
+                required
+              />
+            </div>
+          )}
+          {showForgotPassword ? (
+            <>
+              <button type="submit" className="auth-button">Send Reset Email</button>
+              <p className="auth-link">
+                <button
+                  type="button"
+                  className="link-button"
+                  onClick={() => setShowForgotPassword(false)}
+                >
+                  Back to Login
+                </button>
+              </p>
+            </>
+          ) : (
+            <>
+              <button type="submit" className="auth-button">Login with Email</button>
+              <p className="auth-link">
+                <button
+                  type="button"
+                  className="link-button"
+                  onClick={() => {
+                    setShowForgotPassword(true);
+                    setError('');
+                    setSuccessMessage('');
+                  }}
+                >
+                  Forgot Password?
+                </button>
+              </p>
+            </>
+          )}
         </form>
 
         <button onClick={handleGoogleLogin} className="google-button">Login with Google</button>
@@ -142,6 +205,7 @@ export default function Login() {
         <div id="recaptcha-container"></div>
 
         {error && <p className="error">{error}</p>}
+        {successMessage && <p className="success">{successMessage}</p>}
         <p className="auth-link">
           Don't have an account? <Link to="/register">Register</Link>
         </p>

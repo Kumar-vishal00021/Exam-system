@@ -85,8 +85,32 @@
   transform: scale(1.02);
 }
 
+.phone-button {
+  width: 100%;
+  padding: 12px;
+  font-size: 16px;
+  color: white;
+  background: #f6a623;
+  border: none;
+  border-radius: 8px;
+  margin-top: 10px;
+  cursor: pointer;
+  transition: transform 0.2s, background 0.3s;
+}
+
+.phone-button:hover {
+  background: #e69500;
+  transform: scale(1.02);
+}
+
 .error {
   color: #e53e3e;
+  margin-top: 10px;
+  font-size: 14px;
+}
+
+.success {
+  color: #38a169;
   margin-top: 10px;
   font-size: 14px;
 }
@@ -97,12 +121,17 @@
   color: #718096;
 }
 
-.auth-link a {
+.auth-link a, .link-button {
   color: #4a90e2;
   text-decoration: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  font: inherit;
 }
 
-.auth-link a:hover {
+.auth-link a:hover, .link-button:hover {
   text-decoration: underline;
 }
 
