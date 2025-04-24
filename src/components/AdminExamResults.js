@@ -11,6 +11,7 @@ export default function AdminExamResults() {
   const [exam, setExam] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [searchTerm, setSearchTerm] = useState(''); // New state for search
 
   useEffect(() => {
     const fetchResults = async () => {
@@ -107,35 +108,48 @@ export default function AdminExamResults() {
       </header>
       <section className="top-students-section">
         <h2>Student Results</h2>
+        <div className="search-container">
+          <input
+            type="text"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            placeholder="Search by student name..."
+            className="search-input"
+          />
+        </div>
         <div className="top-students-list">
           {results.length > 0 ? (
-            results.map((result, index) => (
-              <div key={index} className="top-student-item">
-                <h3>{index + 1}. {result.userName}</h3>
-                <p>Exam: {result.examTitle}</p>
-                <p>Score: {result.score}/{result.totalQuestions} ({result.percentage.toFixed(2)}%)</p>
-                <div className="result-actions">
-                  <button
-                    onClick={() => handleDeleteResult(result.id)}
-                    className="delete-result-button"
-                  >
-                    Delete Result
-                  </button>
-                  <button
-                    onClick={() => handleViewReport(result.examId, result.userId)}
-                    className="view-report-button"
-                  >
-                    View Report
-                  </button>
-                  <button
-                    onClick={() => handleAllowReExam(result.id)}
-                    className="reexam-button"
-                  >
-                    Allow Re-Exam
-                  </button>
+            results
+              .filter(result =>
+                result.userName.toLowerCase().includes(searchTerm.toLowerCase())
+              )
+              .map((result, index) => (
+                <div key={index} className="top-student-item">
+                  <h3>{index + 1}. {result.userName}</h3>
+                  <p>Exam: {result.examTitle}</p>
+                  <p>Score: {result.score}/{result.totalQuestions} ({result.percentage.toFixed(2)}%)</p>
+                  <div className="result-actions">
+                    <button
+                      onClick={() => handleDeleteResult(result.id)}
+                      className="delete-result-button"
+                    >
+                      Delete Result
+                    </button>
+                    <button
+                      onClick={() => handleViewReport(result.examId, result.userId)}
+                      className="view-report-button"
+                    >
+                      View Report
+                    </button>
+                    <button
+                      onClick={() => handleAllowReExam(result.id)}
+                      className="reexam-button"
+                    >
+                      Allow Re-Exam
+                    </button>
+                  </div>
                 </div>
-              </div>
-            ))
+              ))
           ) : (
             <p className="no-data">No results yet.</p>
           )}

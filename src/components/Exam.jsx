@@ -18,7 +18,8 @@ export default function Exam() {
   const [showExitConfirm, setShowExitConfirm] = useState(false);
   const [showReExamPopup, setShowReExamPopup] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
-  const [emailSentMessage, setEmailSentMessage] = useState(''); // New state for email confirmation
+  const [emailSentMessage, setEmailSentMessage] = useState('');
+  const [searchTerm, setSearchTerm] = useState(''); // New state for search
 
   useEffect(() => {
     const fetchExam = async () => {
@@ -50,8 +51,8 @@ export default function Exam() {
         if (!resultSnapshot.empty) {
           const resultData = resultSnapshot.docs[0].data();
           if (!resultData.reExamAllowed) {
-            setShowReExamPopup(true); // Show popup if exam taken without permission
-            return; // Stop further execution
+            setShowReExamPopup(true);
+            return;
           }
         }
 
@@ -179,7 +180,7 @@ export default function Exam() {
 
   const closeReExamPopup = () => {
     setShowReExamPopup(false);
-    navigate('/dashboard'); // Return to dashboard after closing popup
+    navigate('/dashboard');
   };
 
   const formatTime = (seconds) => {
@@ -212,31 +213,44 @@ export default function Exam() {
         </div>
       </header>
       <section className="questions-section">
-        {exam.questions.map((question, index) => (
-          <div className="question-card" key={index}>
-            <h2>
-              {index + 1}. {question.text}
-            </h2>
-            <div className="options">
-              {question.options.map((option, optIndex) => (
-                <label key={optIndex} className="option-label">
-                  <input
-                    type="radio"
-                    name={`question-${index}`}
-                    value={option}
-                    checked={answers[index] === option}
-                    onChange={() => handleAnswerChange(index, option)}
-                    disabled={isSubmitted}
-                  />
-                  {option}
-                </label>
-              ))}
+        <div className="search-container sticky-header">
+          <input
+            type="text"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            placeholder="Search questions..."
+            className="search-input"
+          />
+        </div>
+        {exam.questions
+          .filter(question =>
+            question.text.toLowerCase().includes(searchTerm.toLowerCase())
+          )
+          .map((question, index) => (
+            <div className="question-card" key={index}>
+              <h2>
+                {index + 1}. {question.text}
+              </h2>
+              <div className="options">
+                {question.options.map((option, optIndex) => (
+                  <label key={optIndex} className="option-label">
+                    <input
+                      type="radio"
+                      name={`question-${index}`}
+                      value={option}
+                      checked={answers[index] === option}
+                      onChange={() => handleAnswerChange(index, option)}
+                      disabled={isSubmitted}
+                    />
+                    {option}
+                  </label>
+                ))}
+              </div>
             </div>
-          </div>
-        ))}
+          ))}
         <button onClick={() => handleSubmit(false)} className="submit-button" disabled={isSubmitted}>
-            Submit Exam
-          </button>
+          Submit Exam
+        </button>
       </section>
       {emailSentMessage && (
         <div className="email-sent-message">

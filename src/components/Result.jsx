@@ -12,6 +12,7 @@ export default function Result() {
   const [result, setResult] = useState(null);
   const [exam, setExam] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState(''); // New state for search
   const isAdmin = currentUser.email === 'kumarvishal00021@gmail.com';
 
   useEffect(() => {
@@ -70,43 +71,56 @@ export default function Result() {
       </section>
       <section className="result-details">
         <h2>Detailed Answers</h2>
+        <div className="search-container">
+          <input
+            type="text"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            placeholder="Search questions..."
+            className="search-input"
+          />
+        </div>
         <div className="answers-list">
-          {exam.questions.map((q, index) => {
-            const chosenAnswer = result.answers[index] || 'Not Answered';
-            const isCorrect = chosenAnswer === q.correctAnswer;
-            return (
-              <div key={index} className="answer-card">
-                <h3>{index + 1}. {q.text}</h3>
-                <div className="options">
-                  {q.options.map((option, optIndex) => {
-                    const isChosen = option === chosenAnswer;
-                    const isCorrectOption = option === q.correctAnswer;
-                    return (
-                      <div
-                        key={optIndex}
-                        className={`option ${
-                          isChosen
-                            ? isCorrect
+          {exam.questions
+            .filter(question =>
+              question.text.toLowerCase().includes(searchTerm.toLowerCase())
+            )
+            .map((q, index) => {
+              const chosenAnswer = result.answers[index] || 'Not Answered';
+              const isCorrect = chosenAnswer === q.correctAnswer;
+              return (
+                <div key={index} className="answer-card">
+                  <h3>{index + 1}. {q.text}</h3>
+                  <div className="options">
+                    {q.options.map((option, optIndex) => {
+                      const isChosen = option === chosenAnswer;
+                      const isCorrectOption = option === q.correctAnswer;
+                      return (
+                        <div
+                          key={optIndex}
+                          className={`option ${
+                            isChosen
+                              ? isCorrect
+                                ? 'correct'
+                                : 'incorrect'
+                              : isCorrectOption
                               ? 'correct'
-                              : 'incorrect'
-                            : isCorrectOption
-                            ? 'correct'
-                            : ''
-                        }`}
-                      >
-                        <span>{option}</span>
-                        {isChosen && (
-                          <span className="status">
-                            {isCorrect ? '✓ Correct' : '✗ Incorrect'}
-                          </span>
-                        )}
-                      </div>
-                    );
-                  })}
+                              : ''
+                          }`}
+                        >
+                          <span>{option}</span>
+                          {isChosen && (
+                            <span className="status">
+                              {isCorrect ? '✓ Correct' : '✗ Incorrect'}
+                            </span>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
-              </div>
-            );
-          })}
+              );
+            })}
         </div>
       </section>
       <Link to="/dashboard" className="dashboard-button">Back to Dashboard</Link>

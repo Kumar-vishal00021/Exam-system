@@ -1,19 +1,10 @@
-import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { db, auth } from "../firebase/firebaseConfig";
-import {
-  collection,
-  getDocs,
-  query,
-  where,
-  doc,
-  getDoc,
-  deleteDoc,
-  updateDoc,
-} from "firebase/firestore";
-import { signOut } from "firebase/auth";
-import { useAuth } from "../context/AuthContext";
-import "../styles/Dashboard.css";
+import { useEffect, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { db, auth } from '../firebase/firebaseConfig';
+import { collection, getDocs, query, where, doc, getDoc, deleteDoc, updateDoc } from 'firebase/firestore';
+import { signOut } from 'firebase/auth';
+import { useAuth } from '../context/AuthContext';
+import '../styles/Dashboard.css';
 
 export default function Dashboard() {
   const { currentUser } = useAuth();
@@ -26,53 +17,48 @@ export default function Dashboard() {
   const [showConfirm, setShowConfirm] = useState(false);
   const [selectedExamId, setSelectedExamId] = useState(null);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [closing, setClosing] = useState(false); // State for toggling mobile menu
-  const isAdmin = currentUser?.email === "kumarvishal00021@gmail.com";
+  const [closing, setClosing] = useState(false);
+  const [searchTerm, setSearchTerm] = useState(''); // New state for search
+  const isAdmin = currentUser?.email === 'kumarvishal00021@gmail.com';
 
   useEffect(() => {
     const fetchData = async () => {
       if (!currentUser) {
-        setError("Please sign in to view the dashboard.");
+        setError('Please sign in to view the dashboard.');
         setLoading(false);
         return;
       }
 
       try {
-        const examsSnapshot = await getDocs(collection(db, "exams"));
-        setExams(
-          examsSnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }))
-        );
+        const examsSnapshot = await getDocs(collection(db, 'exams'));
+        setExams(examsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
 
         if (isAdmin) {
-          const allResultsSnapshot = await getDocs(collection(db, "results"));
-          const allResultsData = allResultsSnapshot.docs.map((doc) => ({
+          const allResultsSnapshot = await getDocs(collection(db, 'results'));
+          const allResultsData = allResultsSnapshot.docs.map(doc => ({
             id: doc.id,
             ...doc.data(),
           }));
 
-          const userIds = [
-            ...new Set(allResultsData.map((result) => result.userId)),
-          ];
+          const userIds = [...new Set(allResultsData.map(result => result.userId))];
           const users = {};
           for (const id of userIds) {
-            const userDoc = await getDoc(doc(db, "users", id));
+            const userDoc = await getDoc(doc(db, 'users', id));
             if (userDoc.exists()) {
               const userData = userDoc.data();
-              users[id] = userData.name || "Anonymous";
+              users[id] = userData.name || 'Anonymous';
               if (!userData.name) {
-                console.warn(
-                  `User ${id} has no name field in users collection`
-                );
+                console.warn(`User ${id} has no name field in users collection`);
               }
             } else {
               console.warn(`User document ${id} not found in users collection`);
-              users[id] = "Anonymous";
+              users[id] = 'Anonymous';
             }
           }
 
-          const enrichedResults = allResultsData.map((result) => ({
+          const enrichedResults = allResultsData.map(result => ({
             ...result,
-            userName: users[result.userId] || "Anonymous",
+            userName: users[result.userId] || 'Anonymous',
             percentage: (result.score / result.totalQuestions) * 100,
           }));
           const sortedResults = enrichedResults
@@ -81,20 +67,20 @@ export default function Dashboard() {
           setTopStudents(sortedResults);
         } else {
           const resultsQuery = query(
-            collection(db, "results"),
-            where("userId", "==", currentUser.uid)
+            collection(db, 'results'),
+            where('userId', '==', currentUser.uid)
           );
           const resultsSnapshot = await getDocs(resultsQuery);
           setResults(
-            resultsSnapshot.docs.map((doc) => ({
+            resultsSnapshot.docs.map(doc => ({
               ...doc.data(),
               percentage: (doc.data().score / doc.data().totalQuestions) * 100,
             }))
           );
         }
       } catch (error) {
-        console.error("Dashboard fetch error:", error);
-        setError("Failed to load dashboard: " + error.message);
+        console.error('Dashboard fetch error:', error);
+        setError('Failed to load dashboard: ' + error.message);
       } finally {
         setLoading(false);
       }
@@ -105,10 +91,10 @@ export default function Dashboard() {
   const handleLogout = async () => {
     try {
       await signOut(auth);
-      navigate("/login");
+      navigate('/login');
     } catch (error) {
-      console.error("Logout error:", error);
-      alert("Failed to log out: " + error.message);
+      console.error('Logout error:', error);
+      alert('Failed to log out: ' + error.message);
     }
   };
 
@@ -134,31 +120,29 @@ export default function Dashboard() {
   const handleDeleteExam = async (examId) => {
     if (
       window.confirm(
-        "Are you sure you want to delete this exam? This action cannot be undone."
+        'Are you sure you want to delete this exam? This action cannot be undone.'
       )
     ) {
       try {
-        await deleteDoc(doc(db, "exams", examId));
-        setExams(exams.filter((exam) => exam.id !== examId));
-        alert("Exam deleted successfully.");
+        await deleteDoc(doc(db, 'exams', examId));
+        setExams(exams.filter(exam => exam.id !== examId));
+        alert('Exam deleted successfully.');
       } catch (error) {
-        console.error("Error deleting exam:", error);
-        alert("Failed to delete exam: " + error.message);
+        console.error('Error deleting exam:', error);
+        alert('Failed to delete exam: ' + error.message);
       }
     }
   };
 
   const handleDeleteResult = async (resultId) => {
-    if (window.confirm("Are you sure you want to delete this result?")) {
+    if (window.confirm('Are you sure you want to delete this result?')) {
       try {
-        await deleteDoc(doc(db, "results", resultId));
-        setTopStudents(
-          topStudents.filter((student) => student.id !== resultId)
-        );
-        alert("Result deleted successfully.");
+        await deleteDoc(doc(db, 'results', resultId));
+        setTopStudents(topStudents.filter(student => student.id !== resultId));
+        alert('Result deleted successfully.');
       } catch (error) {
-        console.error("Error deleting result:", error);
-        alert("Failed to delete result: " + error.message);
+        console.error('Error deleting result:', error);
+        alert('Failed to delete result: ' + error.message);
       }
     }
   };
@@ -168,26 +152,28 @@ export default function Dashboard() {
   };
 
   const handleAllowReExam = async (resultId) => {
-    if (window.confirm("Allow this student to retake the exam?")) {
+    if (window.confirm('Allow this student to retake the exam?')) {
       try {
-        await updateDoc(doc(db, "results", resultId), { reExamAllowed: true });
-        const updatedStudents = topStudents.map((student) =>
-          student.id === resultId
-            ? { ...student, reExamAllowed: true }
-            : student
+        await updateDoc(doc(db, 'results', resultId), { reExamAllowed: true });
+        const updatedStudents = topStudents.map(student =>
+          student.id === resultId ? { ...student, reExamAllowed: true } : student
         );
         setTopStudents(updatedStudents);
-        alert("Re-exam allowed successfully.");
+        alert('Re-exam allowed successfully.');
       } catch (error) {
-        console.error("Error allowing re-exam:", error);
-        alert("Failed to allow re-exam: " + error.message);
+        console.error('Error allowing re-exam:', error);
+        alert('Failed to allow re-exam: ' + error.message);
       }
     }
   };
 
   const toggleMenu = () => {
-    setMenuOpen(!menuOpen);
-    
+    if (menuOpen) {
+      setClosing(true);
+    } else {
+      setMenuOpen(true);
+      setClosing(false);
+    }
   };
 
   if (loading)
@@ -203,11 +189,11 @@ export default function Dashboard() {
     <div className="dashboard">
       <div className="mobile-menu">
         <button className="menu-button" onClick={toggleMenu}>
-          ☰
+          {menuOpen ? '▲' : '☰'}
         </button>
         {(menuOpen || closing) && (
           <div
-            className={`mobile-menu-content ${closing ? "closing" : ""}`}
+            className={`mobile-menu-content ${closing ? 'closing' : ''}`}
             onAnimationEnd={() => {
               if (closing) {
                 setClosing(false);
@@ -251,39 +237,53 @@ export default function Dashboard() {
 
         <section className="exams-section">
           <h2>Available Exams</h2>
+          <div className="search-container">
+            <input
+              type="text"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="Search exams by title or subject..."
+              className="search-input"
+            />
+          </div>
           <div className="exams-grid">
             {exams.length > 0 ? (
-              exams.map((exam) => (
-                <div key={exam.id} className="exam-card">
-                  <h3>
-                    {exam.title} ({exam.subject})
-                  </h3>
-                  <p>{exam.description}</p>
-                  {isAdmin ? (
-                    <>
-                      <Link
-                        to={`/admin/exam/${exam.id}/results`}
-                        className="view-results-button"
-                      >
-                        View Student Results
-                      </Link>
+              exams
+                .filter(exam =>
+                  exam.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                  exam.subject.toLowerCase().includes(searchTerm.toLowerCase())
+                )
+                .map(exam => (
+                  <div key={exam.id} className="exam-card">
+                    <h3>
+                      {exam.title} ({exam.subject})
+                    </h3>
+                    <p>{exam.description}</p>
+                    {isAdmin ? (
+                      <>
+                        <Link
+                          to={`/admin/exam/${exam.id}/results`}
+                          className="view-results-button"
+                        >
+                          View Student Results
+                        </Link>
+                        <button
+                          onClick={() => handleDeleteExam(exam.id)}
+                          className="delete-exam-button"
+                        >
+                          Delete Exam
+                        </button>
+                      </>
+                    ) : (
                       <button
-                        onClick={() => handleDeleteExam(exam.id)}
-                        className="delete-exam-button"
+                        onClick={() => handleStartExam(exam.id)}
+                        className="start-exam-button"
                       >
-                        Delete Exam
+                        Start Exam
                       </button>
-                    </>
-                  ) : (
-                    <button
-                      onClick={() => handleStartExam(exam.id)}
-                      className="start-exam-button"
-                    >
-                      Start Exam
-                    </button>
-                  )}
-                </div>
-              ))
+                    )}
+                  </div>
+                ))
             ) : (
               <p className="no-data">No exams available yet.</p>
             )}

@@ -18,6 +18,7 @@ export default function Admin() {
   const [editId, setEditId] = useState(null);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState(''); // New state for search
 
   useEffect(() => {
     const fetchExams = async () => {
@@ -116,6 +117,15 @@ export default function Admin() {
       <header className="admin-header">
         <button onClick={handleBack} className="back-button">Back</button>
         <h1>{editId ? 'Edit Exam' : 'Add New Exam'}</h1>
+        <div className="search-container">
+          <input
+            type="text"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            placeholder="Search Existing  exams by title or subject..."
+            className="search-input"
+          />
+        </div>
       </header>
       {error && <p className="error">{error}</p>}
       <form onSubmit={handleSubmit} className="admin-form">
@@ -192,18 +202,24 @@ export default function Admin() {
 
       <section className="exam-list">
         <h2>Existing Exams</h2>
+
         {exams.length > 0 ? (
           <div className="exam-grid">
-            {exams.map(exam => (
-              <div key={exam.id} className="exam-item">
-                <h3>{exam.title} ({exam.subject})</h3>
-                <p>{exam.description}</p>
-                <div className="exam-actions">
-                  <button onClick={() => handleEdit(exam)} className="edit-button">Edit</button>
-                  <button onClick={() => handleDelete(exam.id)} className="delete-button">Delete</button>
+            {exams
+              .filter(exam =>
+                exam.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                exam.subject.toLowerCase().includes(searchTerm.toLowerCase())
+              )
+              .map(exam => (
+                <div key={exam.id} className="exam-item">
+                  <h3>{exam.title} ({exam.subject})</h3>
+                  <p>{exam.description}</p>
+                  <div className="exam-actions">
+                    <button onClick={() => handleEdit(exam)} className="edit-button">Edit</button>
+                    <button onClick={() => handleDelete(exam.id)} className="delete-button">Delete</button>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
           </div>
         ) : (
           <p className="no-data">No exams available yet.</p>
