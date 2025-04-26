@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import '../styles/Dashboard.css';
+import '../styles/Contact.css';
 
 export default function Contact() {
   const navigate = useNavigate();
@@ -9,8 +9,8 @@ export default function Contact() {
   };
 
   return (
-    <div className="dashboard container">
-      <header className="dashboard-header">
+    <div className="contact container">
+      <header className="contact-header">
         <button onClick={handleBack} className="back-button">Back</button>
         <h1>Contact Us</h1>
       </header>

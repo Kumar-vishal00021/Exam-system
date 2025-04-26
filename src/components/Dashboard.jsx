@@ -16,9 +16,8 @@ export default function Dashboard() {
   const [error, setError] = useState(null);
   const [showConfirm, setShowConfirm] = useState(false);
   const [selectedExamId, setSelectedExamId] = useState(null);
-  const [menuOpen, setMenuOpen] = useState(false);
-  const [closing, setClosing] = useState(false);
-  const [searchTerm, setSearchTerm] = useState(''); // New state for search
+  const [isOpen, setIsOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
   const isAdmin = currentUser?.email === 'kumarvishal00021@gmail.com';
 
   useEffect(() => {
@@ -98,10 +97,6 @@ export default function Dashboard() {
     }
   };
 
-  const handleBack = () => {
-    navigate(-1);
-  };
-
   const handleStartExam = (examId) => {
     setSelectedExamId(examId);
     setShowConfirm(true);
@@ -167,13 +162,8 @@ export default function Dashboard() {
     }
   };
 
-  const toggleMenu = () => {
-    if (menuOpen) {
-      setClosing(true);
-    } else {
-      setMenuOpen(true);
-      setClosing(false);
-    }
+  const toggleSidebar = () => {
+    setIsOpen(!isOpen);
   };
 
   if (loading)
@@ -187,46 +177,31 @@ export default function Dashboard() {
 
   return (
     <div className="dashboard">
-      <div className="mobile-menu">
-        <button className="menu-button" onClick={toggleMenu}>
-          {menuOpen ? '▲' : '☰'}
-        </button>
-        {(menuOpen || closing) && (
-          <div
-            className={`mobile-menu-content ${closing ? 'closing' : ''}`}
-            onAnimationEnd={() => {
-              if (closing) {
-                setClosing(false);
-                setMenuOpen(false);
-              }
-            }}
-          >
-            <Link to="/about" className="nav-link" onClick={toggleMenu}>
-              About
-            </Link>
-            <Link to="/contact" className="nav-link" onClick={toggleMenu}>
-              Contact
-            </Link>
-          </div>
-        )}
-      </div>
       <nav className="nav-bar">
-        <Link to="/about" className="nav-link">
-          About
-        </Link>
-        <Link to="/contact" className="nav-link">
-          Contact
-        </Link>
+        <button className="menu-button" onClick={toggleSidebar}>
+          {isOpen ? 'X' : '☰'}
+        </button>
+        <div className="nav-links">
+          <Link to="/dashboard" className="nav-link">Dashboard</Link>
+          <Link to="/about" className="nav-link">About</Link>
+          <Link to="/contact" className="nav-link">Contact</Link>
+          <Link to="/login" className="nav-link" onClick={handleLogout}>Logout</Link>
+        </div>
       </nav>
+
+      <div className={`sidebar ${isOpen ? 'open' : ''}`}>
+        <h2 className="logo">📘 Dashboard</h2>
+        <nav className="sidebar-nav">
+          <Link to="/dashboard" className="nav-link" onClick={toggleSidebar}>Dashboard</Link>
+          <Link to="/about" className="nav-link" onClick={toggleSidebar}>About</Link>
+          <Link to="/contact" className="nav-link" onClick={toggleSidebar}>Contact</Link>
+          <Link to="/login" className="nav-link" onClick={() => { handleLogout(); toggleSidebar(); }}>Logout</Link>
+        </nav>
+      </div>
+
       <div className="container">
         <header className="dashboard-header">
-          <button onClick={handleBack} className="back-button">
-            Back
-          </button>
           <h1>Welcome, {currentUser?.displayName || currentUser?.email}</h1>
-          <button onClick={handleLogout} className="logout-button">
-            Logout
-          </button>
         </header>
 
         {isAdmin && (

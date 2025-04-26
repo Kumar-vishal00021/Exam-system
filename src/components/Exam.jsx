@@ -213,7 +213,7 @@ export default function Exam() {
         </div>
       </header>
       <section className="questions-section">
-        <div className="search-container sticky-header">
+        <div className="search-container">
           <input
             type="text"
             value={searchTerm}

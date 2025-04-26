@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import '../styles/Dashboard.css';
+import '../styles/About.css';
 
 export default function About() {
   const navigate = useNavigate();
@@ -9,8 +9,8 @@ export default function About() {
   };
 
   return (
-    <div className="dashboard container">
-      <header className="dashboard-header">
+    <div className="about container">
+      <header className="about-header">
         <button onClick={handleBack} className="back-button">Back</button>
         <h1>About Us</h1>
       </header>

@@ -1,6 +1,7 @@
-body{
+body {
   background: linear-gradient(90deg, #bde6f2, #cabfd2);
 }
+
 .container {
   max-width: 1200px;
   margin: 0 auto;
@@ -24,7 +25,7 @@ body{
   margin: 0;
 }
 
-.back-button, .logout-button, .start-exam-button, .view-results-button, .delete-exam-button, .delete-result-button, .view-report-button, .reexam-button, .dashboard-button {
+.back-button, .start-exam-button, .view-results-button, .delete-exam-button, .delete-result-button, .view-report-button, .reexam-button, .dashboard-button {
   padding: 10px 20px;
   font-size: 16px;
   border: none;
@@ -40,16 +41,6 @@ body{
 
 .back-button:hover {
   background: #718096;
-  transform: scale(1.05);
-}
-
-.logout-button {
-  background: #e53e3e;
-  color: white;
-}
-
-.logout-button:hover {
-  background: #c53030;
   transform: scale(1.05);
 }
 
@@ -254,6 +245,7 @@ body{
   height: 50px;
   animation: spin 1s linear infinite;
 }
+
 .loader-text {
   display: block;
   color: #556d90;
@@ -261,19 +253,24 @@ body{
   margin-top: 10px;
   text-align: center;
 }
+
 @keyframes spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
 }
 
-
+/* Navigation Bar (Desktop and Mobile Container) */
 .nav-bar {
   background: #5e2d79;
   padding: 15px 20px;
   display: flex;
+  align-items: center;
+}
+
+/* Desktop Navigation Links */
+.nav-links {
+  display: none; /* Hidden by default, shown on desktop */
   gap: 20px;
-  flex-wrap: wrap;
-  justify-content: flex-start;
 }
 
 .nav-link {
@@ -288,13 +285,9 @@ body{
   color: #ffffff;
 }
 
-/* Mobile Menu Styles */
-.mobile-menu {
-  display: none;
-}
-
+/* Mobile Toggle Button */
 .menu-button {
-  background: #5e2d79;
+  background: none;
   color: #d1c4e9;
   border: none;
   font-size: 24px;
@@ -307,98 +300,36 @@ body{
   background: #4a2361;
 }
 
-.mobile-menu-content {
-  background: #5e2d79;
-  position: absolute;
-  top: 40px;
+/* Sidebar (Mobile) */
+.sidebar {
+  width: 250px;
+  height: 100vh;
+  background-color: #f8f9fa;
+  position: fixed;
+  top: 0;
+  left: -250px;
+  transition: left 0.3s ease-in-out;
+  z-index: 1000;
+  background: linear-gradient(90deg, #667eea, #764ba2);
+}
+
+.sidebar.open {
   left: 0;
-  width: 12%;
+}
+
+.logo {
+  padding: 20px;
+  font-size: 24px;
+  text-align: center;
+}
+
+.sidebar-nav {
   display: flex;
   flex-direction: column;
+  padding: 20px;
   gap: 10px;
-  padding: 2px 2px;
-  z-index: 1000;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-  animation: slideDown 0.3s ease-out;
-  transform-origin: top;
-}
-.mobile-menu-content-closing {
-  background: #5e2d79;
-  position: absolute;
-  top: 40px;
-  left: 0;
-  width: 12%;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  padding: 2px 2px;
-  z-index: 1000;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-  animation: slideDown 0.3s ease-out;
-  transform-origin: top;
 }
 
-
-@keyframes slideDown {
-  from {
-    transform: scaleY(0);
-    opacity: 0;
-  }
-  to {
-    transform: scaleY(1);
-    opacity: 1;
-  }
-}
-
-@keyframes slideUp {
-  from {
-    transform: scaleY(1);
-    opacity: 1;
-  }
-  to {
-    transform: scaleY(0);
-    opacity: 0;
-  }
-}
-.mobile-menu-content .nav-link {
-  font-size: 16px;
-  padding: 10px 0;
-}
-
-/* Responsive Styles */
-@media (max-width: 768px) {
-  .nav-bar {
-    display: none; /* Hide the nav-bar on mobile */
-  }
-
-  .mobile-menu {
-    display: block; /* Show the mobile menu */
-    position: relative;
-  }
-
-  .mobile-menu-content {
-    display: flex;
-  }
-
-  .mobile-menu-content .nav-link {
-    font-size: 14px;
-  }
-}
-
-@media (max-width: 480px) {
-  .nav-link {
-    font-size: 12px;
-  }
-
-  .mobile-menu-content .nav-link {
-    font-size: 12px;
-  }
-
-  .menu-button {
-    font-size: 20px;
-    padding: 8px 12px;
-  }
-}
 .search-container {
   margin-bottom: 20px;
 }
@@ -410,4 +341,52 @@ body{
   border: 1px solid #e2e8f0;
   border-radius: 8px;
   box-sizing: border-box;
+}
+
+/* Media Queries for Responsive Design */
+@media (max-width: 768px) {
+  .nav-links {
+    display: none; /* Ensure links are hidden on mobile */
+  }
+
+  .menu-button {
+    display: block; /* Show toggle button on mobile */
+  }
+
+  .nav-bar {
+    justify-content: flex-end; /* Button on the right */
+  }
+}
+
+@media (min-width: 769px) {
+  .sidebar {
+    display: none; /* Hide sidebar on desktop */
+  }
+
+  .menu-button {
+    display: none; /* Hide toggle button on desktop */
+  }
+
+  .nav-links {
+    display: flex; /* Show navigation links on desktop */
+  }
+
+  .nav-bar {
+    justify-content: space-between; /* Spread links and space on desktop */
+  }
+}
+
+@media (max-width: 480px) {
+  .nav-link {
+    font-size: 12px;
+  }
+
+  .menu-button {
+    font-size: 20px;
+    padding: 8px 12px;
+  }
+
+  .sidebar-nav .nav-link {
+    font-size: 14px;
+  }
 }
