@@ -6,6 +6,7 @@ import { signOut } from 'firebase/auth';
 import { useAuth } from '../context/AuthContext';
 import '../styles/Dashboard.css';
 import AdUnit from './adUnit';
+import AdSenseAd from './adUnit';
 
 export default function Dashboard() {
   const { currentUser } = useAuth();
@@ -199,12 +200,9 @@ export default function Dashboard() {
           <Link to="/login" className="nav-link" onClick={() => { handleLogout(); toggleSidebar(); }}>Logout</Link>
         </nav>
       </div>
-      <div className="w-full max-w-[1080px] min-h-[90px] md:min-h-[250px] mx-auto  ad-container">
-          <AdUnit
-            adSlot="4368261081"
-            type="display"
-            wrapperStyle={{ width: "100%" }}
-          />
+      <div style={{width:"100%",height:"250px"}}>
+        <p>add</p> 
+          <AdSenseAd />
         </div>
       <div className="container">
         <header className="dashboard-header">
