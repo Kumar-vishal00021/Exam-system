@@ -6,7 +6,6 @@ export default function PrivateRoute() {
 
   if (loading) return (
     <div className="loader-container">
-      console.log("Private Rout");
       <p className="loader-text">Please Wait! Authentication in Progress....</p>
       <div className="loader"></div>
     </div>
