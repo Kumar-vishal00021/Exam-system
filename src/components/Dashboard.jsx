@@ -5,8 +5,6 @@ import { collection, getDocs, query, where, doc, getDoc, deleteDoc, updateDoc } 
 import { signOut } from 'firebase/auth';
 import { useAuth } from '../context/AuthContext';
 import '../styles/Dashboard.css';
-import AdUnit from './adUnit';
-import AdSenseAd from './adUnit';
 
 export default function Dashboard() {
   const { currentUser } = useAuth();
@@ -200,10 +198,6 @@ export default function Dashboard() {
           <Link to="/login" className="nav-link" onClick={() => { handleLogout(); toggleSidebar(); }}>Logout</Link>
         </nav>
       </div>
-      <div style={{width:"100%",height:"250px"}}>
-        <p>add</p> 
-          <AdSenseAd />
-        </div>
       <div className="container">
         <header className="dashboard-header">
           <h1>Welcome, {currentUser?.displayName || currentUser?.email}</h1>
