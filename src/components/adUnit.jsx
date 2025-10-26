@@ -15,7 +15,7 @@ export default function AdUnit({
   wrapperStyle,
   className,
 }) {
-  const insRef = useRef<HTMLModElement>(null);
+  const insRef = useRef(null);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
