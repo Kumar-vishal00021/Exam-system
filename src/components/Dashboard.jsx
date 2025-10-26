@@ -5,6 +5,7 @@ import { collection, getDocs, query, where, doc, getDoc, deleteDoc, updateDoc } 
 import { signOut } from 'firebase/auth';
 import { useAuth } from '../context/AuthContext';
 import '../styles/Dashboard.css';
+import AdUnit from './adUnit';
 
 export default function Dashboard() {
   const { currentUser } = useAuth();
@@ -200,7 +201,7 @@ export default function Dashboard() {
       </div>
       <div className="w-full max-w-[1080px] min-h-[90px] md:min-h-[250px] mx-auto  ad-container">
           <AdUnit
-            adSlot="1839978397"
+            adSlot="4368261081"
             type="display"
             wrapperStyle={{ width: "100%" }}
           />

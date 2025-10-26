@@ -4,7 +4,7 @@ import React, { useEffect, useRef } from "react";
 
 
 // Put your publisher ID here once (same as in layout.tsx)
-const AD_CLIENT = "ca-pub-7999925953450607";
+const AD_CLIENT = "ca-pub-5005896729722611";
 
 export default function AdUnit({
   adSlot,
