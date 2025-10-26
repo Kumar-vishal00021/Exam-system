@@ -198,7 +198,13 @@ export default function Dashboard() {
           <Link to="/login" className="nav-link" onClick={() => { handleLogout(); toggleSidebar(); }}>Logout</Link>
         </nav>
       </div>
-
+      <div className="w-full max-w-[1080px] min-h-[90px] md:min-h-[250px] mx-auto  ad-container">
+          <AdUnit
+            adSlot="1839978397"
+            type="display"
+            wrapperStyle={{ width: "100%" }}
+          />
+        </div>
       <div className="container">
         <header className="dashboard-header">
           <h1>Welcome, {currentUser?.displayName || currentUser?.email}</h1>
