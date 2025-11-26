@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { db } from '../firebase/firebaseConfig';
 import { doc, getDoc, setDoc, query, collection, where, getDocs } from 'firebase/firestore';
@@ -115,13 +115,13 @@ export default function Exam() {
       window.removeEventListener('beforeunload', handleBeforeUnload);
       window.removeEventListener('popstate', handlePopState);
     };
-  }, [isSubmitted]);
+  }, [isSubmitted,handleSubmit]);
 
   const handleAnswerChange = (questionIndex, option) => {
     setAnswers(prev => ({ ...prev, [questionIndex]: option }));
   };
 
-  const handleSubmit = async (isAutoSubmit = false) => {
+  const handleSubmit =useCallback( async (isAutoSubmit = false) => {
     if (isSubmitted) {
       alert('Exam has already been submitted.');
       return;
@@ -159,7 +159,7 @@ export default function Exam() {
       console.error('Error submitting exam:', error);
       setError('Failed to submit exam: ' + error.message);
     }
-  };
+  },[handleSubmit]);
 
   const handleExit = () => {
     if (!isSubmitted) {
